@@ -388,9 +388,12 @@ h3 {
 
 /* --- Day Tabs Navigation --- */
 .day-tabs-nav {
+    width: 100%;
+    max-width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     scrollbar-width: none; /* Hide standard Firefox scrollbar */
-    padding-bottom: 2px;
+    padding-bottom: 4px;
 }
 
 .day-tabs-nav::-webkit-scrollbar {
@@ -400,10 +403,11 @@ h3 {
 .day-tabs-container {
     display: flex;
     gap: var(--space-sm);
-    min-width: max-content;
+    flex-wrap: nowrap;
 }
 
 .day-tab {
+    flex-shrink: 0;
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 12px;
