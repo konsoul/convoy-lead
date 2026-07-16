@@ -772,6 +772,21 @@ h3 {
     color: #ffffff;
 }
 
+.leg-card.completed .btn-nav-directions,
+.leg-card.completed .btn-copy-address,
+.leg-card.completed .btn-edit-address {
+    background-color: rgba(255, 255, 255, 0.04);
+    color: #64748b;
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.leg-card.completed .final-stretch-banner {
+    background: #1e293b;
+    color: #64748b;
+    box-shadow: none;
+}
+
+
 /* --- Modals (Glassmorphism overlays) --- */
 .modal-overlay {
     position: fixed;
