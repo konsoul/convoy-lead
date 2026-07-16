@@ -738,34 +738,41 @@ h3 {
 
 /* --- Completed Leg States --- */
 .leg-card.completed {
-    opacity: 0.55;
-    filter: grayscale(40%);
+    opacity: 0.45;
+    filter: grayscale(100%);
 }
 
 .leg-card.completed:hover {
-    opacity: 0.8;
-    filter: grayscale(0%);
+    opacity: 0.65;
+    filter: grayscale(100%);
 }
 
 .leg-card.completed .leg-title-area h3 {
-    color: #94a3b8;
+    color: #64748b;
     text-decoration: line-through;
+}
+
+.leg-card.completed .address-text,
+.leg-card.completed .route-desc-text,
+.leg-card.completed .notes-text {
+    color: #94a3b8;
 }
 
 .leg-card.completed .leg-time-window {
     background-color: rgba(255, 255, 255, 0.05);
-    color: #94a3b8;
+    color: #64748b;
     border-color: transparent;
 }
 
 .leg-card.completed .btn-completion {
-    border-color: var(--green-glow);
-    background-color: rgba(74, 222, 128, 0.04);
-    color: var(--green);
+    border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.03);
+    color: #94a3b8;
 }
 
 .leg-card.completed .btn-completion:hover {
-    background-color: rgba(74, 222, 128, 0.08);
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
 }
 
 /* --- Modals (Glassmorphism overlays) --- */
