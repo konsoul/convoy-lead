@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderActiveDay();
             updateOverallProgress();
             setupGlobalEventListeners();
+            setupDragToScroll();
             
             // Initialize lucide icons for statically defined HTML
             lucide.createIcons();
@@ -394,6 +395,54 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target === pdfModal) closePDF();
             if (e.target === editModal) closeEdit();
         });
+    }
+
+    function setupDragToScroll() {
+        const slider = document.querySelector('.day-tabs-nav');
+        if (!slider) return;
+
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        let isDragging = false;
+
+        slider.addEventListener('mousedown', (e) => {
+            isDown = true;
+            isDragging = false;
+            slider.style.cursor = 'grabbing';
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+        });
+
+        slider.addEventListener('mouseleave', () => {
+            isDown = false;
+            slider.style.cursor = 'auto';
+        });
+
+        slider.addEventListener('mouseup', () => {
+            isDown = false;
+            slider.style.cursor = 'auto';
+            setTimeout(() => { isDragging = false; }, 0);
+        });
+
+        slider.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - slider.offsetLeft;
+            const walk = (x - startX) * 1.5; // Scroll speed multiplier
+            if (Math.abs(walk) > 3) {
+                isDragging = true;
+            }
+            slider.scrollLeft = scrollLeft - walk;
+        });
+
+        slider.addEventListener('click', (e) => {
+            if (isDragging) {
+                e.preventDefault();
+                e.stopPropagation();
+                isDragging = false;
+            }
+        }, true); // Capture phase to prevent tab click
     }
 
     function setupCardEventListeners() {
