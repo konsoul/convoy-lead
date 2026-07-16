@@ -393,14 +393,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Event Listeners Setup ---
 
     function setupGlobalEventListeners() {
-        // PDF Modal triggers
-        viewPdfBtn.addEventListener('click', () => {
-            pdfModal.classList.add('active');
-        });
+        // PDF Modal triggers (safeguarded)
+        if (viewPdfBtn && pdfModal) {
+            viewPdfBtn.addEventListener('click', () => {
+                pdfModal.classList.add('active');
+            });
+        }
         
-        const closePDF = () => pdfModal.classList.remove('active');
-        closePdfBtn.addEventListener('click', closePDF);
-        closePdfFooterBtn.addEventListener('click', closePDF);
+        const closePDF = () => {
+            if (pdfModal) pdfModal.classList.remove('active');
+        };
+        
+        if (closePdfBtn) closePdfBtn.addEventListener('click', closePDF);
+        if (closePdfFooterBtn) closePdfFooterBtn.addEventListener('click', closePDF);
 
         // Edit Modal triggers
         const closeEdit = () => {
