@@ -120,6 +120,42 @@ document.addEventListener('DOMContentLoaded', () => {
         return 1;
     }
 
+    function isLastLegOfTrip(legId) {
+        if (!itineraryData || itineraryData.length === 0) return false;
+        const lastDay = itineraryData[itineraryData.length - 1];
+        if (!lastDay.legs || lastDay.legs.length === 0) return false;
+        const lastLeg = lastDay.legs[lastDay.legs.length - 1];
+        return getLegId(lastLeg) === legId;
+    }
+
+    function triggerCelebration() {
+        if (typeof confetti === 'function') {
+            const duration = 3000;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#0a84ff', '#30d158', '#ff9f0a', '#ff453a', '#bf5af2'] // macOS colors
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#0a84ff', '#30d158', '#ff9f0a', '#ff453a', '#bf5af2']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+    }
+
     // --- Progress Calculation ---
     function updateOverallProgress() {
         if (itineraryData.length === 0) return;
@@ -463,8 +499,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 setTimeout(() => {
+                    const wasCompleted = isLegCompleted(legId);
                     toggleLegCompletion(legId);
                     renderActiveDay();
+                    
+                    if (!wasCompleted && isLastLegOfTrip(legId)) {
+                        triggerCelebration();
+                    }
                 }, 150);
             });
         });
