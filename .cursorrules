@@ -1,0 +1,4 @@
+# Custom Rules for Trip App Workspace
+
+## Web Application Development Rules
+- **NEVER use Service Workers**: Under no circumstances should Service Workers (`sw.js` or registration logic) be added to this or any web application project. Caching should be managed using standard HTTP headers or standard browser cache behaviors, not Service Workers, to prevent developer environment conflicts.

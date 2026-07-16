@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convoy Lead — Cross-Country Caravan Itinerary</title>
+    <!-- Google Fonts: Outfit (headings) & Inter (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Main Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="title-area">
+                    <span class="badge badge-accent">Convoy Lead</span>
+                    <h1>Cross-Country Caravan</h1>
+                    <p class="route-subtitle">Canton, GA <i data-lucide="arrow-right" class="subtitle-arrow"></i> Canyonville, OR</p>
+                </div>
+                <div class="header-actions">
+                    <button id="view-pdf-btn" class="btn btn-secondary">
+                        <i data-lucide="file-text"></i>
+                        <span>View Original PDF</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Grid & Progress -->
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon-wrapper"><i data-lucide="calendar"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Duration</span>
+                        <span class="stat-value">6 Days</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon-wrapper"><i data-lucide="map-pin"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Total Stops</span>
+                        <span class="stat-value">16 Stops</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon-wrapper"><i data-lucide="navigation"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Total Distance</span>
+                        <span class="stat-value">1,600+ Miles</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="overall-progress-container">
+                <div class="progress-info">
+                    <span class="progress-label">Overall Completion</span>
+                    <span id="progress-text" class="progress-percentage">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Day Selector Tabs -->
+        <nav class="day-tabs-nav">
+            <div class="day-tabs-container" id="day-tabs">
+                <!-- Dynamic Tabs injected here -->
+            </div>
+        </nav>
+
+        <!-- Active Day Panel -->
+        <main class="main-content">
+            <div class="day-header-card">
+                <div class="day-header-meta">
+                    <span id="active-day-badge" class="badge badge-primary">Day 1</span>
+                    <h2 id="active-day-title">Loading Day Details...</h2>
+                </div>
+                <hr class="card-divider">
+                <div class="day-target-info">
+                    <span class="section-eyebrow">Daily Target</span>
+                    <p id="active-day-target" class="target-text">Loading...</p>
+                </div>
+                <div id="active-day-overnight-container" class="day-overnight-info">
+                    <hr class="card-divider">
+                    <span class="section-eyebrow">Overnight Stay</span>
+                    <div class="hotel-pill">
+                        <i data-lucide="bed"></i>
+                        <span id="active-day-hotel">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leg Cards List -->
+            <section class="legs-section" id="legs-container">
+                <!-- Leg cards injected dynamically -->
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>Convoy Lead &copy; 2026. Safe travels.</p>
+        </footer>
+    </div>
+
+    <!-- PDF Viewer Modal -->
+    <div id="pdf-modal" class="modal-overlay">
+        <div class="modal-card pdf-modal-card">
+            <div class="modal-header">
+                <h3>Original Itinerary PDF</h3>
+                <button id="close-pdf-btn" class="btn-close"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body pdf-body">
+                <iframe src="itinerary.pdf" type="application/pdf" width="100%" height="100%"></iframe>
+            </div>
+            <div class="modal-footer">
+                <a href="itinerary.pdf" download class="btn btn-secondary">
+                    <i data-lucide="download"></i>
+                    <span>Download PDF</span>
+                </a>
+                <button id="close-pdf-footer-btn" class="btn btn-primary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Address Edit Modal -->
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-card address-modal-card">
+            <div class="modal-header">
+                <h3 id="edit-modal-title">Edit Address</h3>
+                <button id="close-edit-btn" class="btn-close"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="edit-description">Update this location if plans change or if you need to set a custom waypoint.</p>
+                <div class="form-group">
+                    <label for="address-textarea">Address / Label</label>
+                    <textarea id="address-textarea" rows="3" placeholder="Enter address..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="reset-address-btn" class="btn btn-danger">Reset to Original</button>
+                <div class="modal-footer-actions">
+                    <button id="cancel-edit-btn" class="btn btn-secondary">Cancel</button>
+                    <button id="save-address-btn" class="btn btn-primary">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Entrypoint -->
+    <script src="app.js"></script>
+</body>
+</html>
