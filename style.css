@@ -6,22 +6,22 @@
 
 /* --- Custom Properties (Tokens) --- */
 :root {
-    /* macOS Dark Mode System Colors */
-    --bg-main: #161618;       /* macOS dark window background */
-    --bg-card: #1e1e1e;       /* macOS secondary grouped background */
-    --bg-card-hover: #252525;
-    --bg-badge: #2c2c2e;      /* macOS tertiary background */
-    --border-color: rgba(255, 255, 255, 0.08);
-    --border-hover: rgba(255, 255, 255, 0.16);
+    /* Monokai Theme Colors */
+    --bg-main: #272822;       /* Monokai classic dark background */
+    --bg-card: #383830;       /* Slightly lighter card background */
+    --bg-card-hover: #49483e;
+    --bg-badge: #49483e;      /* Monokai selection background */
+    --border-color: rgba(255, 255, 255, 0.1);
+    --border-hover: rgba(255, 255, 255, 0.2);
 
-    --primary: #0a84ff;       /* macOS system blue */
-    --primary-glow: rgba(10, 132, 255, 0.18);
-    --accent: #bf5af2;        /* macOS system purple */
-    --accent-glow: rgba(191, 90, 242, 0.14);
-    --green: #30d158;         /* macOS system green */
-    --green-glow: rgba(48, 209, 88, 0.16);
-    --orange: #ff9f0a;        /* macOS system orange */
-    --danger: #ff453a;        /* macOS system red */
+    --primary: #66d9ef;       /* Monokai Cyan */
+    --primary-glow: rgba(102, 217, 239, 0.15);
+    --accent: #ae81ff;        /* Monokai Purple */
+    --accent-glow: rgba(174, 129, 255, 0.15);
+    --green: #a6e22e;         /* Monokai Green */
+    --green-glow: rgba(166, 226, 46, 0.15);
+    --orange: #fd971f;        /* Monokai Orange */
+    --danger: #f92672;        /* Monokai Pink/Red */
 
     /* Typography — SF Pro style via system-ui */
     --font-heading: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;

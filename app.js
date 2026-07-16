@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     angle: 60,
                     spread: 55,
                     origin: { x: 0 },
-                    colors: ['#0a84ff', '#30d158', '#ff9f0a', '#ff453a', '#bf5af2'], // macOS colors
+                    colors: ['#66d9ef', '#a6e22e', '#fd971f', '#f92672', '#ae81ff'], // Monokai colors
                     zIndex: 9999
                 });
                 confetti({
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     angle: 120,
                     spread: 55,
                     origin: { x: 1 },
-                    colors: ['#0a84ff', '#30d158', '#ff9f0a', '#ff453a', '#bf5af2'],
+                    colors: ['#66d9ef', '#a6e22e', '#fd971f', '#f92672', '#ae81ff'],
                     zIndex: 9999
                 });
 
