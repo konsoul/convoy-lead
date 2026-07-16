@@ -406,7 +406,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let scrollLeft;
         let isDragging = false;
 
-        slider.addEventListener('mousedown', (e) => {
+        // Use pointer events to distinguish between mouse and touch
+        slider.addEventListener('pointerdown', (e) => {
+            if (e.pointerType !== 'mouse') return; // Let mobile devices use native CSS touch scrolling
             isDown = true;
             isDragging = false;
             slider.style.cursor = 'grabbing';
@@ -414,19 +416,21 @@ document.addEventListener('DOMContentLoaded', () => {
             scrollLeft = slider.scrollLeft;
         });
 
-        slider.addEventListener('mouseleave', () => {
+        slider.addEventListener('pointerleave', (e) => {
+            if (e.pointerType !== 'mouse') return;
             isDown = false;
             slider.style.cursor = 'auto';
         });
 
-        slider.addEventListener('mouseup', () => {
+        slider.addEventListener('pointerup', (e) => {
+            if (e.pointerType !== 'mouse') return;
             isDown = false;
             slider.style.cursor = 'auto';
             setTimeout(() => { isDragging = false; }, 0);
         });
 
-        slider.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
+        slider.addEventListener('pointermove', (e) => {
+            if (!isDown || e.pointerType !== 'mouse') return;
             e.preventDefault();
             const x = e.pageX - slider.offsetLeft;
             const walk = (x - startX) * 1.5; // Scroll speed multiplier
