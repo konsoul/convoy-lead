@@ -120,11 +120,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return 1;
     }
 
-    function isLastLegOfTrip(legId) {
-        if (!itineraryData || itineraryData.length === 0) return false;
-        const lastDay = itineraryData[itineraryData.length - 1];
-        if (!lastDay.legs || lastDay.legs.length === 0) return false;
-        const lastLeg = lastDay.legs[lastDay.legs.length - 1];
+    function isLastLegOfDay(legId) {
+        const day = itineraryData.find(d => d.day_number === activeDayNumber);
+        if (!day || !day.legs || day.legs.length === 0) return false;
+        const lastLeg = day.legs[day.legs.length - 1];
         return getLegId(lastLeg) === legId;
     }
 
@@ -139,14 +138,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     angle: 60,
                     spread: 55,
                     origin: { x: 0 },
-                    colors: ['#0a84ff', '#30d158', '#ff9f0a', '#ff453a', '#bf5af2'] // macOS colors
+                    colors: ['#0a84ff', '#30d158', '#ff9f0a', '#ff453a', '#bf5af2'], // macOS colors
+                    zIndex: 9999
                 });
                 confetti({
                     particleCount: 5,
                     angle: 120,
                     spread: 55,
                     origin: { x: 1 },
-                    colors: ['#0a84ff', '#30d158', '#ff9f0a', '#ff453a', '#bf5af2']
+                    colors: ['#0a84ff', '#30d158', '#ff9f0a', '#ff453a', '#bf5af2'],
+                    zIndex: 9999
                 });
 
                 if (Date.now() < end) {
@@ -503,7 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     toggleLegCompletion(legId);
                     renderActiveDay();
                     
-                    if (!wasCompleted && isLastLegOfTrip(legId)) {
+                    if (!wasCompleted && isLastLegOfDay(legId)) {
                         triggerCelebration();
                     }
                 }, 150);
