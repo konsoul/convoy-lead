@@ -404,6 +404,8 @@ h3 {
     display: flex;
     gap: var(--space-sm);
     flex-wrap: nowrap;
+    width: max-content;
+    min-width: 100%;
 }
 
 .day-tab {
