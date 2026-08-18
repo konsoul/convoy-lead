@@ -15,7 +15,9 @@
           "route_details": "Canton, GA \u2192 1855 US-72, Huntsville, AL 35811 (153 miles, approx. 3 hrs 0 mins)",
           "operational_notes": "Clean initial leg departing right after peak local traffic. Plan a 30-minute staging and fueling break upon arrival.",
           "destination_address": "1855 US Highway 72 E, Huntsville, AL 35811",
-          "start_address": "Canton, GA"
+          "destination_coords": { "lat": 34.7471, "lon": -86.5356 },
+          "start_address": "Canton, GA",
+          "start_coords": { "lat": 34.2368, "lon": -84.4908 }
         },
         {
           "name": "Midday Run",
@@ -24,7 +26,9 @@
           "route_details": "1855 US-72, Huntsville, AL 35811 \u2192 4356 Forest Hill Irene Rd, Memphis, TN 38125 (213 miles, approx. 3 hrs 55 mins)",
           "operational_notes": "Direct highway transit corridor heading west. Plan a 30-minute lunch and fuel break.",
           "destination_address": "4356 Forest Hill Irene Road, Memphis, TN 38125",
-          "start_address": "1855 US Highway 72 E, Huntsville, AL 35811"
+          "destination_coords": { "lat": 35.0326, "lon": -89.7898 },
+          "start_address": "1855 US Highway 72 E, Huntsville, AL 35811",
+          "start_coords": { "lat": 34.7471, "lon": -86.5356 }
         },
         {
           "name": "Evening Stretch",
@@ -33,7 +37,9 @@
           "route_details": "4356 Forest Hill Irene Rd, Memphis, TN 38125 \u2192 4900 Talley Road, Little Rock, AR 72204 (137 miles, approx. 2 hrs 10 mins)",
           "operational_notes": "Final leg crossing the Mississippi River into Arkansas, landing safely ahead of the evening rush at the Day 1 hotel destination to set up for Day 2's early 06:00 AM departure.",
           "destination_address": "4900 Talley Road, Little Rock, AR 72204",
-          "start_address": "4356 Forest Hill Irene Road, Memphis, TN 38125"
+          "destination_coords": { "lat": 34.7317, "lon": -92.3813 },
+          "start_address": "4356 Forest Hill Irene Road, Memphis, TN 38125",
+          "start_coords": { "lat": 35.0326, "lon": -89.7898 }
         }
       ]
     },
@@ -52,7 +58,9 @@
           "route_details": "4900 Talley Rd, Little Rock, AR \u2192 903 E Trudgeon St, Henryetta, OK (248 miles, 3 hrs 35 mins)",
           "operational_notes": "Early departure avoids local Little Rock morning commuter buildup. Plan a 30-minute staging and fueling break upon arrival.",
           "destination_address": "903 E Trudgeon Street, Henryetta, OK",
-          "start_address": "4900 Talley Road, Little Rock, AR 72204"
+          "destination_coords": { "lat": 35.4418, "lon": -95.9725 },
+          "start_address": "4900 Talley Road, Little Rock, AR 72204",
+          "start_coords": { "lat": 34.7317, "lon": -92.3813 }
         },
         {
           "name": "Midday Run",
@@ -61,7 +69,9 @@
           "route_details": "903 E Trudgeon St, Henryetta, OK \u2192 301 S 4th St, Sayre, OK (218 miles, 3 hrs 12 mins)",
           "operational_notes": "Passes through the heart of Oklahoma City at approximately 11:15 AM, hitting the optimal lunch-hour lull. Plan a 30-minute break.",
           "destination_address": "301 S 4th Street, Sayre, OK",
-          "start_address": "903 E Trudgeon Street, Henryetta, OK"
+          "destination_coords": { "lat": 35.2934, "lon": -99.6418 },
+          "start_address": "903 E Trudgeon Street, Henryetta, OK",
+          "start_coords": { "lat": 35.4418, "lon": -95.9725 }
         },
         {
           "name": "Evening Stretch",
@@ -70,7 +80,9 @@
           "route_details": "301 S 4th St, Sayre, OK \u2192 1901 S Mountain Rd, Tucumcari, NM (239 miles, 3 hrs 27 mins)",
           "operational_notes": "Straightforward tracking along I-40 W directly into the Day 2 overnight hotel location.",
           "destination_address": "1901 S Mountain Road, Tucumcari, NM",
-          "start_address": "301 S 4th Street, Sayre, OK"
+          "destination_coords": { "lat": 35.1584, "lon": -103.7258 },
+          "start_address": "301 S 4th Street, Sayre, OK",
+          "start_coords": { "lat": 35.2934, "lon": -99.6418 }
         }
       ]
     },
@@ -89,7 +101,9 @@
           "route_details": "1901 S Mountain Rd, Tucumcari, NM \u2192 650 Juan Tabo Blvd NE, Albuquerque, NM (167 miles, 2 hrs 25 mins)",
           "operational_notes": "A slightly delayed departure allows Albuquerque's morning rush hour to dissolve entirely before your arrival. 30-minute fueling break.",
           "destination_address": "650 Juan Tabo Boulevard NE, Albuquerque, NM",
-          "start_address": "1901 S Mountain Road, Tucumcari, NM"
+          "destination_coords": { "lat": 35.0789, "lon": -106.5165 },
+          "start_address": "1901 S Mountain Road, Tucumcari, NM",
+          "start_coords": { "lat": 35.1584, "lon": -103.7258 }
         },
         {
           "name": "Midday Run",
@@ -98,7 +112,9 @@
           "route_details": "650 Juan Tabo Blvd NE, Albuquerque, NM \u2192 3540 E Historic Hwy 66, Gallup, NM (141 miles, 2 hrs 3 mins)",
           "operational_notes": "Navigates the multi-lane highway splits of the city during clear mid-day traffic. Plan a 30-minute break.",
           "destination_address": "3540 E Historic Highway 66, Gallup, NM",
-          "start_address": "650 Juan Tabo Boulevard NE, Albuquerque, NM"
+          "destination_coords": { "lat": 35.5348, "lon": -108.6942 },
+          "start_address": "650 Juan Tabo Boulevard NE, Albuquerque, NM",
+          "start_coords": { "lat": 35.0789, "lon": -106.5165 }
         },
         {
           "name": "Evening Stretch",
@@ -107,7 +123,9 @@
           "route_details": "3540 E Historic Hwy 66, Gallup, NM \u2192 2015 S Beulah Blvd, Flagstaff, AZ (191 miles, 2 hrs 45 mins)",
           "operational_notes": "Final drive into the Flagstaff hotel. Note: If traveling during Daylight Saving Time, crossing into Arizona will gain 1 hour, shifting local arrival to 02:43 PM.",
           "destination_address": "2015 S Beulah Boulevard, Flagstaff, AZ",
-          "start_address": "3540 E Historic Highway 66, Gallup, NM"
+          "destination_coords": { "lat": 35.1783, "lon": -111.6622 },
+          "start_address": "3540 E Historic Highway 66, Gallup, NM",
+          "start_coords": { "lat": 35.5348, "lon": -108.6942 }
         }
       ]
     },
@@ -126,7 +144,9 @@
           "route_details": "2015 S Beulah Blvd, Flagstaff, AZ \u2192 6035 E Minerva Ln, Kingman, AZ (136 miles, 1 hr 58 mins)",
           "operational_notes": "Scenic, open drive descending down the I-40 W corridor. Plan a 30-minute fuel stop.",
           "destination_address": "6035 E Minerva Lane, Kingman, AZ 86401",
-          "start_address": "2015 S Beulah Boulevard, Flagstaff, AZ"
+          "destination_coords": { "lat": 35.2341, "lon": -113.9213 },
+          "start_address": "2015 S Beulah Boulevard, Flagstaff, AZ",
+          "start_coords": { "lat": 35.1783, "lon": -111.6622 }
         },
         {
           "name": "Midday Run",
@@ -135,7 +155,9 @@
           "route_details": "6035 Minerva Ln, Kingman, AZ \u2192 491 Armory Rd, Barstow, CA (215 miles, 3 hrs 23 mins)",
           "operational_notes": "Sustained open desert transit segment. Ensure communication channels remain open. Plan a 30-minute break.",
           "destination_address": "491 Armory Road, Barstow, CA",
-          "start_address": "6035 E Minerva Lane, Kingman, AZ 86401"
+          "destination_coords": { "lat": 34.8872, "lon": -117.0094 },
+          "start_address": "6035 E Minerva Lane, Kingman, AZ 86401",
+          "start_coords": { "lat": 35.2341, "lon": -113.9213 }
         },
         {
           "name": "Evening Stretch",
@@ -144,7 +166,9 @@
           "route_details": "491 Armory Rd, Barstow, CA \u2192 422 W Tehachapi Blvd, Tehachapi, CA (90 miles, 1 hr 28 mins)",
           "operational_notes": "Short final leg transitioning cleanly off I-40 onto CA-58 W toward the Tehachapi mountain hotel.",
           "destination_address": "422 W Tehachapi Boulevard, Tehachapi, CA",
-          "start_address": "491 Armory Road, Barstow, CA"
+          "destination_coords": { "lat": 35.1322, "lon": -118.4526 },
+          "start_address": "491 Armory Road, Barstow, CA",
+          "start_coords": { "lat": 34.8872, "lon": -117.0094 }
         }
       ]
     },
@@ -163,7 +187,9 @@
           "route_details": "422 W Tehachapi Blvd, Tehachapi, CA \u2192 12754 CA-33, Santa Nella, CA (213 miles, 3 hrs 18 mins)",
           "operational_notes": "Early departure is essential to align the 5-hour journey to Sacramento with the midday low-volume window. 30-minute fuel stop.",
           "destination_address": "12754 Highway 33, Santa Nella, CA",
-          "start_address": "422 W Tehachapi Boulevard, Tehachapi, CA"
+          "destination_coords": { "lat": 37.1024, "lon": -121.0188 },
+          "start_address": "422 W Tehachapi Boulevard, Tehachapi, CA",
+          "start_coords": { "lat": 35.1322, "lon": -118.4526 }
         },
         {
           "name": "Midday Run",
@@ -172,7 +198,9 @@
           "route_details": "12754 CA-33, Santa Nella, CA \u2192 690 Hillgate Rd, Arbuckle, CA (159 miles, 2 hrs 27 mins)",
           "operational_notes": "Passes directly through the center of Sacramento at approximately 12:15 PM, dodging complex multi-lane commuter congestion. 30-minute break.",
           "destination_address": "690 Hillgate Road, Arbuckle, CA",
-          "start_address": "12754 Highway 33, Santa Nella, CA"
+          "destination_coords": { "lat": 39.0188, "lon": -122.0575 },
+          "start_address": "12754 Highway 33, Santa Nella, CA",
+          "start_coords": { "lat": 37.1024, "lon": -121.0188 }
         },
         {
           "name": "Evening Stretch",
@@ -181,7 +209,9 @@
           "route_details": "690 Hillgate Rd, Arbuckle, CA \u2192 1195 Grand Ave, Redding, CA (116 miles, 1 hr 46 mins)",
           "operational_notes": "Clear, low-density rural drive northward up the Sacramento Valley to the final hotel.",
           "destination_address": "1195 Grand Avenue, Redding, CA",
-          "start_address": "690 Hillgate Road, Arbuckle, CA"
+          "destination_coords": { "lat": 40.5865, "lon": -122.3917 },
+          "start_address": "690 Hillgate Road, Arbuckle, CA",
+          "start_coords": { "lat": 39.0188, "lon": -122.0575 }
         }
       ]
     },
@@ -200,7 +230,9 @@
           "route_details": "1195 Grand Ave, Redding, CA \u2192 561 SE Mill St, Canyonville, OR (215 miles, 3 hrs 33 mins)",
           "operational_notes": "No urban gridlock risks. Leaving at 09:00 AM maximizes daylight safety, thermal road traction, and line-of-sight visibility over the mountain grades back home.",
           "destination_address": "561 Mill Street, Canyonville, OR 97417",
-          "start_address": "1195 Grand Avenue, Redding, CA"
+          "destination_coords": { "lat": 42.9298, "lon": -123.2798 },
+          "start_address": "1195 Grand Avenue, Redding, CA",
+          "start_coords": { "lat": 40.5865, "lon": -122.3917 }
         }
       ]
     }
