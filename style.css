@@ -56,6 +56,11 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+}
+
 body {
     background-color: var(--bg-main);
     color: rgba(255, 255, 255, 0.85);  /* macOS primary label */
@@ -66,7 +71,7 @@ body {
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    overflow-x: hidden;
+    overflow-x: clip;
 }
 
 /* Scrollbar styling */
@@ -484,6 +489,33 @@ h3 {
     display: flex;
     flex-direction: column;
     gap: var(--space-sm);
+}
+
+.day-badge-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+.day-weather-pill {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-color);
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.day-weather-pill i {
+    width: 14px;
+    height: 14px;
+    color: var(--primary);
 }
 
 .card-divider {
@@ -1026,18 +1058,21 @@ h3 {
     bottom: 0;
     background-color: rgba(5, 7, 13, 0.7);
     backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity var(--transition-normal);
+    transition: opacity var(--transition-normal), visibility var(--transition-normal);
     padding: var(--space-lg);
 }
 
 .modal-overlay.active {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
 }
 

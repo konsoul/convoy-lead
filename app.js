@@ -134,6 +134,21 @@ document.addEventListener('DOMContentLoaded', () => {
         return min >= 35 ? (hour + 1) % 24 : hour;
     }
 
+    function getShortLocationName(address) {
+        if (!address) return '';
+        const parts = address.split(',').map(s => s.trim());
+        if (parts.length >= 3) {
+            // e.g. "1855 US Highway 72 E", "Huntsville", "AL 35811" -> "Huntsville, AL"
+            const city = parts[parts.length - 2];
+            const stateZip = parts[parts.length - 1].split(' ')[0];
+            return `${city}, ${stateZip}`;
+        } else if (parts.length === 2) {
+            // e.g. "Canton, GA" -> "Canton, GA"
+            return address;
+        }
+        return parts[0];
+    }
+
     // --- Weather Mapping & Blurb Generator ---
 
     function getWeatherInfo(code) {
@@ -187,29 +202,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function generateConditionBlurb(stats, leg, coords) {
-        const { minTemp, maxTemp, avgTemp, maxPrecip, maxWind, dominantCode } = stats;
+    function generateConditionBlurb(stats, leg, startCoords, destCoords, startLoc, destLoc) {
+        const { minTemp, maxTemp, avgTemp, maxPrecip, maxWind, dominantCode, depTemp, arrTemp, depCode, arrCode } = stats;
         const weather = getWeatherInfo(dominantCode);
+        const depWeather = getWeatherInfo(depCode);
+        const arrWeather = getWeatherInfo(arrCode);
+
+        // Check mountain pass conditions (Flagstaff / Siskiyous / Tehachapi)
+        const isMountainPass = (startCoords && (startCoords.lat >= 35 && startCoords.lon <= -111)) ||
+                              (destCoords && (destCoords.lat >= 35 && destCoords.lon <= -111));
 
         // 1. Severe / Thunderstorms
         if (dominantCode >= 95) {
-            return `Thunderstorm activity expected along this transit corridor (precip probability up to ${maxPrecip}% and gusts near ${maxWind} mph). Increase convoy following distance, reduce cruising speed, and monitor radar check-ins.`;
+            return `Thunderstorm activity expected along the ${startLoc} \u2192 ${destLoc} transit corridor (precip probability up to ${maxPrecip}% and gusts near ${maxWind} mph). Increase caravan following distance, reduce cruising speed, and monitor radar check-ins.`;
         }
 
-        // 2. Snow / Winter Conditions
+        // 2. Snow / Freezing / Winter Conditions
         if ((dominantCode >= 71 && dominantCode <= 86) || (dominantCode >= 56 && dominantCode <= 57) || minTemp <= 32) {
-            const passNote = (coords && coords.lat >= 35 && coords.lon <= -111) ? 'pass traction advisories' : 'traction conditions';
-            return `Freezing road conditions possible with temperatures down to ${minTemp}°F. Check mountain ${passNote}, maintain steady headway, and watch for black ice on elevated overpasses.`;
+            const passNote = isMountainPass ? 'pass traction advisories' : 'traction conditions';
+            return `Freezing road conditions possible between ${startLoc} and ${destLoc} with temperatures down to ${minTemp}°F. Check mountain ${passNote}, maintain steady headway, and watch for black ice on elevated overpasses.`;
         }
 
         // 3. Rain / Showers
         if (dominantCode >= 61 || dominantCode === 80 || dominantCode === 81 || dominantCode === 82 || maxPrecip >= 40) {
-            return `Wet pavement anticipated during transit with ${weather.text.toLowerCase()} (${maxPrecip}% chance) and temperatures ranging from ${minTemp}°F to ${maxTemp}°F. Ensure wipers and low-beams are active with extra stopping distance.`;
+            return `Wet pavement anticipated during transit with ${weather.text.toLowerCase()} (${maxPrecip}% chance) and temperatures shifting from ${depTemp}°F at ${startLoc} to ${arrTemp}°F at ${destLoc}. Ensure wipers and low-beams are active with extra stopping distance.`;
         }
 
         // 4. Fog / Low Visibility
         if (dominantCode === 45 || dominantCode === 48) {
-            return `Morning fog and reduced visibility expected along this stretch. Temps hovering around ${avgTemp}°F with gentle winds (${maxWind} mph). Use low-beam lighting and announce waypoint maneuvers over radio.`;
+            return `Morning fog and reduced visibility expected along this stretch (${startLoc} to ${destLoc}). Temps hovering around ${avgTemp}°F with gentle winds (${maxWind} mph). Use low-beam lighting and announce waypoint maneuvers over radio.`;
         }
 
         // 5. High Heat (Geographically Context-Aware)
@@ -218,46 +239,55 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Determine geographic heat context
             let heatType = 'High afternoon heat';
-            if (coords) {
-                if (coords.lon > -95) {
-                    heatType = 'Hot and humid summer conditions';
-                } else if (coords.lon <= -95 && coords.lon >= -118.5 && coords.lat <= 36.5) {
-                    heatType = 'High desert heat';
-                } else if (coords.lat >= 36.5 && coords.lon <= -119) {
-                    heatType = 'Warm Central Valley heat';
-                }
+            const avgLon = destCoords ? (startCoords ? (startCoords.lon + destCoords.lon) / 2 : destCoords.lon) : -95;
+            const avgLat = destCoords ? (startCoords ? (startCoords.lat + destCoords.lat) / 2 : destCoords.lat) : 35;
+
+            if (avgLon > -95) {
+                heatType = 'Hot and humid summer conditions';
+            } else if (avgLon <= -95 && avgLon >= -118.5 && avgLat <= 36.5) {
+                heatType = 'High desert heat';
+            } else if (avgLat >= 36.5 && avgLon <= -119) {
+                heatType = 'Warm Central Valley heat';
             }
 
-            return `${heatType} reaching ${maxTemp}°F${windNote}. Keep vehicle engine temperatures and tire pressures monitored, ensure AC systems are functioning, and keep caravan hydration ready.`;
+            return `${heatType} reaching ${maxTemp}°F${windNote} between ${startLoc} (${depTemp}°F) and ${destLoc} (${arrTemp}°F). Keep vehicle engine temperatures and tire pressures monitored, ensure AC systems are functioning, and keep caravan hydration ready.`;
         }
 
         // 6. High Wind / Mountain Crosswinds
         if (maxWind >= 18) {
-            return `Breezy open corridor with steady crosswinds reaching ${maxWind} mph. Temperatures averaging ${avgTemp}°F. High-profile vehicles and campers should maintain firm two-handed steering.`;
+            return `Breezy open corridor from ${startLoc} to ${destLoc} with steady crosswinds reaching ${maxWind} mph. Temperatures shifting from ${depTemp}°F to ${arrTemp}°F. High-profile vehicles and campers should maintain firm two-handed steering.`;
         }
 
-        // 7. Overcast / Cool
+        // 7. Transitioning Skies (e.g. Clear to Overcast or Partly Cloudy)
+        if (depCode !== arrCode && (depCode <= 3 && arrCode <= 3)) {
+            return `Departing under ${depWeather.text.toLowerCase()} skies in ${startLoc} (${depTemp}°F) transitioning to ${arrWeather.text.toLowerCase()} upon arrival in ${destLoc} (${arrTemp}°F). Calm cruising winds (${maxWind} mph) with dry pavement across this stretch.`;
+        }
+
+        // 8. Overcast / Cool
         if (dominantCode === 3) {
-            return `Overcast skies with mild cruising temperatures between ${minTemp}°F and ${maxTemp}°F. Wind speeds at a calm ${maxWind} mph with dry pavement for standard highway pace.`;
+            return `Overcast skies with mild cruising temperatures between ${minTemp}°F and ${maxTemp}°F (${depTemp}°F at departure \u2192 ${arrTemp}°F upon arrival). Wind speeds at a calm ${maxWind} mph with dry pavement for standard highway pace.`;
         }
 
-        // 8. Partly Cloudy / Fair
+        // 9. Partly Cloudy / Fair
         if (dominantCode === 1 || dominantCode === 2) {
-            return `Partly cloudy with pleasant cruising conditions from ${minTemp}°F at departure to ${maxTemp}°F. Wind speeds around ${maxWind} mph. Favorable driving conditions across this leg.`;
+            return `Partly cloudy with pleasant cruising conditions from ${depTemp}°F at ${startLoc} to ${arrTemp}°F at ${destLoc}. Wind speeds around ${maxWind} mph. Favorable driving conditions across this leg.`;
         }
 
-        // 9. Clear / Sunny
-        return `Clear skies and high line-of-sight visibility with temperatures ranging from ${minTemp}°F to ${maxTemp}°F. Light winds (${maxWind} mph)—ideal convoy cruising weather.`;
+        // 10. Clear / Sunny
+        return `Clear skies and high line-of-sight visibility from ${startLoc} (${depTemp}°F) to ${destLoc} (${arrTemp}°F). Light winds (${maxWind} mph)—ideal convoy cruising weather.`;
     }
 
     // --- Geocoding & Open-Meteo API Fetchers ---
 
-    async function getCoordinates(address, defaultCoords) {
-        if (defaultCoords && defaultCoords.lat && defaultCoords.lon) {
+    async function getCoordinates(address, originalAddress, defaultCoords) {
+        if (!address) return defaultCoords || { lat: 35.0, lon: -95.0 };
+        const trimmed = address.trim();
+
+        // If address matches original unedited address, use pre-calculated defaultCoords
+        if (originalAddress && trimmed.toLowerCase() === originalAddress.trim().toLowerCase() && defaultCoords && defaultCoords.lat && defaultCoords.lon) {
             return defaultCoords;
         }
 
-        const trimmed = address.trim();
         if (geocodeCache.has(trimmed)) {
             return geocodeCache.get(trimmed);
         }
@@ -293,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return cached.data;
         }
 
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m,apparent_temperature&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto&forecast_days=16`;
+        const url = `https://api.open-meteo.com/v1/gfs?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m,apparent_temperature&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto&forecast_days=16`;
         const res = await fetch(url);
         if (!res.ok) {
             throw new Error(`Open-Meteo HTTP error ${res.status}`);
@@ -311,6 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function extractTransitStats(hourly, dateStr, startHour, endHour) {
         if (!hourly || !hourly.time || hourly.time.length === 0) return null;
 
+        let isLiveForecast = true;
         // Find indices for the specific date
         let indices = [];
         for (let i = 0; i < hourly.time.length; i++) {
@@ -325,6 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // If target date is out of range or not found, fallback to the first available day's hours
         if (indices.length === 0) {
+            isLiveForecast = false;
             for (let i = 0; i < Math.min(24, hourly.time.length); i++) {
                 const hour = parseInt(hourly.time[i].substring(11, 13), 10);
                 if (hour >= startHour && hour <= Math.max(startHour, endHour)) {
@@ -343,12 +375,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const winds = indices.map(idx => Math.round(hourly.wind_speed_10m[idx] || 0));
         const codes = indices.map(idx => hourly.weather_code[idx] || 0);
 
-        // Find dominant code (prioritize severe/rain codes over clear)
+        const depCode = codes[0];
+        const arrCode = codes[codes.length - 1];
+
+        // Find dominant code (prioritize severe/rain/fog codes over clear)
         let dominantCode = codes[0];
+        let hasHazard = false;
         for (const code of codes) {
-            if (code >= 95) { dominantCode = code; break; }
-            if (code >= 50 && dominantCode < 50) dominantCode = code;
-            if (code >= dominantCode) dominantCode = code;
+            if (code >= 95) { dominantCode = code; hasHazard = true; break; }
+            if (code >= 70 && dominantCode < 70) { dominantCode = code; hasHazard = true; }
+            if (code >= 50 && dominantCode < 50) { dominantCode = code; hasHazard = true; }
+            if (code >= 45 && dominantCode < 45) { dominantCode = code; hasHazard = true; }
+        }
+
+        // If no hazard (thunderstorm/snow/rain/fog), use the median sky condition
+        if (!hasHazard) {
+            const sortedCodes = [...codes].sort((a, b) => a - b);
+            dominantCode = sortedCodes[Math.floor(sortedCodes.length / 2)];
         }
 
         const minTemp = Math.min(...temps);
@@ -366,13 +409,57 @@ document.addEventListener('DOMContentLoaded', () => {
             maxPrecip,
             maxWind,
             dominantCode,
+            depCode,
+            arrCode,
             depTemp,
-            arrTemp
+            arrTemp,
+            allTemps: temps,
+            allCodes: codes,
+            isLiveForecast
         };
     }
 
     async function loadWeatherForActiveDay(day) {
         const targetDate = getDateForDay(day.day_number);
+
+        // Update Daily Full 24-Hour Weather Summary in the Day Header Card
+        try {
+            if (day.legs && day.legs.length > 0) {
+                const firstLeg = day.legs[0];
+                const firstStart = getCustomAddress(getLegId(firstLeg), 'start') || firstLeg.start_address || '';
+                const originCoords = await getCoordinates(firstStart, firstLeg.start_address, firstLeg.start_coords);
+                const dayHourly = await fetchHourlyForecast(originCoords.lat, originCoords.lon);
+                
+                let day24hTemps = [];
+                let day24hCodes = [];
+                for (let i = 0; i < dayHourly.time.length; i++) {
+                    if (dayHourly.time[i].startsWith(targetDate)) {
+                        day24hTemps.push(Math.round(dayHourly.temperature_2m[i]));
+                        day24hCodes.push(dayHourly.weather_code[i] || 0);
+                    }
+                }
+
+                if (day24hTemps.length > 0) {
+                    const dailyLow = Math.min(...day24hTemps);
+                    const dailyHigh = Math.max(...day24hTemps);
+                    // Afternoon peak condition
+                    const peakCode = day24hCodes[Math.min(14, day24hCodes.length - 1)] || day24hCodes[0];
+                    const dayMeta = getWeatherInfo(peakCode);
+
+                    const dayPill = document.getElementById('day-weather-summary-pill');
+                    if (dayPill) {
+                        dayPill.style.display = 'inline-flex';
+                        dayPill.innerHTML = `
+                            <i data-lucide="${dayMeta.icon}"></i>
+                            <span>Daily: High ${dailyHigh}°F • Low ${dailyLow}°F (${dayMeta.text})</span>
+                        `;
+                        lucide.createIcons();
+                    }
+                }
+            }
+        } catch (dayErr) {
+            console.warn('[Day Weather] Summary Error:', dayErr);
+        }
 
         for (const leg of day.legs) {
             const legId = getLegId(leg);
@@ -382,24 +469,100 @@ document.addEventListener('DOMContentLoaded', () => {
             const startHour = parseTimeToHour(leg.departs);
             const endHour = parseTimeToHour(leg.arrives);
 
+            const customStart = getCustomAddress(legId, 'start');
             const customDest = getCustomAddress(legId, 'dest');
-            const destAddress = customDest || leg.destination_address;
+
+            const startAddress = customStart || leg.start_address || '';
+            const destAddress = customDest || leg.destination_address || '';
+
+            const startLocationName = getShortLocationName(startAddress);
+            const destLocationName = getShortLocationName(destAddress);
 
             try {
-                // Get destination coords (or start coords)
-                const coords = await getCoordinates(destAddress, leg.destination_coords || leg.start_coords);
-                const hourly = await fetchHourlyForecast(coords.lat, coords.lon);
-                const stats = extractTransitStats(hourly, targetDate, startHour, endHour);
+                // Resolve coordinates for BOTH Start and Destination points
+                const [startCoords, destCoords] = await Promise.all([
+                    getCoordinates(startAddress, leg.start_address, leg.start_coords),
+                    getCoordinates(destAddress, leg.destination_address, leg.destination_coords)
+                ]);
 
-                if (!stats) {
+                // Fetch hourly forecasts for BOTH endpoints concurrently
+                const [startHourly, destHourly] = await Promise.all([
+                    fetchHourlyForecast(startCoords.lat, startCoords.lon),
+                    fetchHourlyForecast(destCoords.lat, destCoords.lon)
+                ]);
+
+                const startStats = extractTransitStats(startHourly, targetDate, startHour, endHour);
+                const destStats = extractTransitStats(destHourly, targetDate, startHour, endHour);
+
+                if (!startStats || !destStats) {
                     throw new Error('No weather data for window');
                 }
 
-                const weatherMeta = getWeatherInfo(stats.dominantCode);
-                const blurb = generateConditionBlurb(stats, leg, coords);
+                // Combine stats across the corridor
+                const depTemp = startStats.depTemp;
+                const arrTemp = destStats.arrTemp;
+                const depCode = startStats.depCode;
+                const arrCode = destStats.arrCode;
 
-                const precipClass = stats.maxPrecip >= 35 ? 'precip-alert' : '';
-                const windClass = stats.maxWind >= 18 ? 'wind-alert' : '';
+                const minTemp = Math.min(startStats.minTemp, destStats.minTemp);
+                const maxTemp = Math.max(startStats.maxTemp, destStats.maxTemp);
+                const avgTemp = Math.round((startStats.avgTemp + destStats.avgTemp) / 2);
+                const maxPrecip = Math.max(startStats.maxPrecip, destStats.maxPrecip);
+                const maxWind = Math.max(startStats.maxWind, destStats.maxWind);
+                const isLiveForecast = startStats.isLiveForecast && destStats.isLiveForecast;
+
+                // Pick dominant weather code across both endpoints
+                let dominantCode = startStats.dominantCode;
+                const allCodes = [...startStats.allCodes, ...destStats.allCodes];
+                let hasHazard = false;
+                for (const code of allCodes) {
+                    if (code >= 95) { dominantCode = code; hasHazard = true; break; }
+                    if (code >= 70 && dominantCode < 70) { dominantCode = code; hasHazard = true; }
+                    if (code >= 50 && dominantCode < 50) { dominantCode = code; hasHazard = true; }
+                    if (code >= 45 && dominantCode < 45) { dominantCode = code; hasHazard = true; }
+                }
+
+                if (!hasHazard) {
+                    // Blend start & dest codes
+                    if (depCode === 0 && arrCode === 0) dominantCode = 0;
+                    else if (depCode <= 1 && arrCode <= 1) dominantCode = 1;
+                    else if (depCode <= 2 && arrCode <= 2) dominantCode = 2;
+                    else dominantCode = (Math.max(depCode, arrCode) >= 3 && Math.min(depCode, arrCode) <= 1) ? 2 : Math.max(depCode, arrCode);
+                }
+
+                const combinedStats = {
+                    minTemp,
+                    maxTemp,
+                    avgTemp,
+                    maxPrecip,
+                    maxWind,
+                    dominantCode,
+                    depTemp,
+                    arrTemp,
+                    depCode,
+                    arrCode,
+                    isLiveForecast
+                };
+
+                const weatherMeta = getWeatherInfo(combinedStats.dominantCode);
+                const depWeatherMeta = getWeatherInfo(depCode);
+                const arrWeatherMeta = getWeatherInfo(arrCode);
+                
+                const conditionLabel = (depWeatherMeta.text === arrWeatherMeta.text) 
+                    ? depWeatherMeta.text 
+                    : `${depWeatherMeta.text} \u2192 ${arrWeatherMeta.text}`;
+
+                const blurb = generateConditionBlurb(combinedStats, leg, startCoords, destCoords, startLocationName, destLocationName);
+
+                const precipClass = combinedStats.maxPrecip >= 35 ? 'precip-alert' : '';
+                const windClass = combinedStats.maxWind >= 18 ? 'wind-alert' : '';
+
+                const outlookBadgeHTML = !isLiveForecast ? `
+                    <span class="weather-pill" title="Target date is outside standard 16-day window; displaying closest available outlook">
+                        <i data-lucide="info"></i>
+                        <span>16-Day Outlook</span>
+                    </span>
+                ` : '';
 
                 container.innerHTML = `
                     <div class="weather-widget-header">
@@ -408,23 +571,24 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <i data-lucide="${weatherMeta.icon}"></i>
                             </div>
                             <div class="weather-headline">
-                                <span class="weather-temp-range">${stats.minTemp}°F – ${stats.maxTemp}°F</span>
-                                <span class="weather-condition-tag">${weatherMeta.text} • ${leg.departs} to ${leg.arrives}</span>
+                                <span class="weather-temp-range">${combinedStats.minTemp}°F – ${combinedStats.maxTemp}°F</span>
+                                <span class="weather-condition-tag">${conditionLabel} • ${leg.departs} (${startLocationName}) \u2192 ${leg.arrives} (${destLocationName})</span>
                             </div>
                         </div>
                         <div class="weather-metrics-pills">
                             <span class="weather-pill ${precipClass}">
                                 <i data-lucide="droplet"></i>
-                                <span>${stats.maxPrecip}% Precip</span>
+                                <span>${combinedStats.maxPrecip}% Precip</span>
                             </span>
                             <span class="weather-pill ${windClass}">
                                 <i data-lucide="wind"></i>
-                                <span>${stats.maxWind} mph Wind</span>
+                                <span>${combinedStats.maxWind} mph Wind</span>
                             </span>
-                            <span class="weather-pill" title="Departure vs Arrival Temp">
+                            <span class="weather-pill" title="Departure (${startLocationName} at ${leg.departs}) \u2192 Arrival (${destLocationName} at ${leg.arrives})">
                                 <i data-lucide="thermometer"></i>
-                                <span>${stats.depTemp}°F \u2192 ${stats.arrTemp}°F</span>
+                                <span>${combinedStats.depTemp}°F \u2192 ${combinedStats.arrTemp}°F</span>
                             </span>
+                            ${outlookBadgeHTML}
                         </div>
                     </div>
                     <div class="weather-blurb-box">
@@ -793,14 +957,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // PDF Modal triggers (safeguarded)
+        const pdfFrame = document.getElementById('pdf-frame');
+
         if (viewPdfBtn && pdfModal) {
             viewPdfBtn.addEventListener('click', () => {
+                if (pdfFrame && (!pdfFrame.src || pdfFrame.src === 'about:blank' || pdfFrame.src.endsWith('about:blank'))) {
+                    pdfFrame.src = pdfFrame.getAttribute('data-src') || 'itinerary.pdf';
+                }
                 pdfModal.classList.add('active');
             });
         }
         
         const closePDF = () => {
-            if (pdfModal) pdfModal.classList.remove('active');
+            if (pdfModal) {
+                pdfModal.classList.remove('active');
+                if (pdfFrame) {
+                    pdfFrame.src = 'about:blank';
+                }
+            }
         };
         
         if (closePdfBtn) closePdfBtn.addEventListener('click', closePDF);
@@ -843,42 +1017,39 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!slider) return;
 
         let isDown = false;
-        let startX;
-        let scrollLeft;
+        let startX = 0;
+        let scrollLeft = 0;
         let isDragging = false;
 
-        // Use pointer events to distinguish between mouse and touch
+        // Pointer down on tab bar (only primary left click)
         slider.addEventListener('pointerdown', (e) => {
-            if (e.pointerType !== 'mouse') return;
+            if (e.pointerType !== 'mouse' || e.button !== 0) return;
             isDown = true;
             isDragging = false;
-            slider.style.cursor = 'grabbing';
             startX = e.pageX - slider.offsetLeft;
             scrollLeft = slider.scrollLeft;
         });
 
-        slider.addEventListener('pointerleave', (e) => {
-            if (e.pointerType !== 'mouse') return;
+        const endDrag = () => {
+            if (!isDown) return;
             isDown = false;
-            slider.style.cursor = 'auto';
-        });
+            slider.style.cursor = '';
+            setTimeout(() => { isDragging = false; }, 50);
+        };
 
-        slider.addEventListener('pointerup', (e) => {
-            if (e.pointerType !== 'mouse') return;
-            isDown = false;
-            slider.style.cursor = 'auto';
-            setTimeout(() => { isDragging = false; }, 0);
-        });
+        window.addEventListener('pointerup', endDrag);
+        window.addEventListener('pointercancel', endDrag);
 
         slider.addEventListener('pointermove', (e) => {
             if (!isDown || e.pointerType !== 'mouse') return;
-            e.preventDefault();
             const x = e.pageX - slider.offsetLeft;
             const walk = (x - startX) * 1.5;
-            if (Math.abs(walk) > 3) {
+            if (Math.abs(walk) > 5) {
                 isDragging = true;
+                slider.style.cursor = 'grabbing';
+                e.preventDefault();
+                slider.scrollLeft = scrollLeft - walk;
             }
-            slider.scrollLeft = scrollLeft - walk;
         });
 
         slider.addEventListener('click', (e) => {

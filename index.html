@@ -57,7 +57,7 @@
                     <div class="stat-icon-wrapper"><i data-lucide="navigation"></i></div>
                     <div class="stat-info">
                         <span class="stat-label">Total Distance</span>
-                        <span class="stat-value">1,600+ Miles</span>
+                        <span class="stat-value">2,850+ Miles</span>
                     </div>
                 </div>
             </div>
@@ -84,7 +84,13 @@
         <main class="main-content">
             <div class="day-header-card">
                 <div class="day-header-meta">
-                    <span id="active-day-badge" class="badge badge-primary">Day 1</span>
+                    <div class="day-badge-row">
+                        <span id="active-day-badge" class="badge badge-primary">Day 1</span>
+                        <div id="day-weather-summary-pill" class="day-weather-pill" style="display: none;">
+                            <i data-lucide="sun"></i>
+                            <span id="day-weather-summary-text">Loading...</span>
+                        </div>
+                    </div>
                     <h2 id="active-day-title">Loading Day Details...</h2>
                 </div>
                 <hr class="card-divider">
@@ -121,7 +127,7 @@
                 <button id="close-pdf-btn" class="btn-close"><i data-lucide="x"></i></button>
             </div>
             <div class="modal-body pdf-body">
-                <iframe src="itinerary.pdf" type="application/pdf" width="100%" height="100%"></iframe>
+                <iframe id="pdf-frame" src="about:blank" data-src="itinerary.pdf" type="application/pdf" width="100%" height="100%"></iframe>
             </div>
             <div class="modal-footer">
                 <a href="itinerary.pdf" download class="btn btn-secondary">
