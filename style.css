@@ -909,16 +909,48 @@ h3 {
 }
 
 .stats-pill {
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border-color);
-    padding: 4px 8px;
+    padding: 5px 10px;
     border-radius: 6px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.4);
+    font-weight: 600;
     width: fit-content;
+    border: 1px solid var(--border-color);
+    background-color: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 0.01em;
+}
+
+.stats-pill.stats-pill-green {
+    background-color: rgba(166, 226, 46, 0.12);
+    border-color: rgba(166, 226, 46, 0.35);
+    color: var(--green);
+}
+
+.stats-pill.stats-pill-green i {
+    color: var(--green);
+}
+
+.stats-pill.stats-pill-orange {
+    background-color: rgba(253, 151, 31, 0.12);
+    border-color: rgba(253, 151, 31, 0.35);
+    color: var(--orange);
+}
+
+.stats-pill.stats-pill-orange i {
+    color: var(--orange);
+}
+
+.stats-pill.stats-pill-red {
+    background-color: rgba(249, 38, 114, 0.14);
+    border-color: rgba(249, 38, 114, 0.4);
+    color: var(--danger);
+}
+
+.stats-pill.stats-pill-red i {
+    color: var(--danger);
 }
 
 .stats-pill i {

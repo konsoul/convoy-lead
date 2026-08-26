@@ -194,6 +194,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function getDurationPillClass(transitStats) {
+        if (!transitStats) return 'stats-pill-green';
+        
+        let totalMinutes = 0;
+        const hoursMatch = transitStats.match(/(\d+)\s*(?:hr|hour)s?/i);
+        const minsMatch = transitStats.match(/(\d+)\s*(?:min|minute)s?/i);
+        
+        if (hoursMatch) totalMinutes += parseInt(hoursMatch[1], 10) * 60;
+        if (minsMatch) totalMinutes += parseInt(minsMatch[1], 10);
+        
+        // Duration criteria:
+        // Pushing past 3.5 hrs (> 210 mins): Red
+        // More than 2 hours (> 120 mins): Orange
+        // Between 1 and 2 hours (<= 120 mins): Green
+        if (totalMinutes > 210) {
+            return 'stats-pill-red';
+        } else if (totalMinutes > 120) {
+            return 'stats-pill-orange';
+        } else {
+            return 'stats-pill-green';
+        }
+    }
+
     // --- Weather Mapping & Blurb Generator ---
 
     function getWeatherInfo(code) {
@@ -937,8 +960,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let statsPillHTML = '';
             if (transitStats) {
+                const durationColorClass = getDurationPillClass(transitStats);
                 statsPillHTML = `
-                    <div class="stats-pill">
+                    <div class="stats-pill ${durationColorClass}">
                         <i data-lucide="car"></i>
                         <span>${transitStats}</span>
                     </div>
