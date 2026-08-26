@@ -557,6 +557,280 @@ h3 {
     color: var(--primary);
 }
 
+/* --- Sinus Relief & Clean Air Escape Banner (Day Header) --- */
+.sinus-relief-banner {
+    margin-top: var(--space-md);
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.03);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.sinus-relief-banner.stage-warning {
+    background: linear-gradient(135deg, rgba(255, 159, 10, 0.15), rgba(255, 69, 58, 0.08));
+    border-color: rgba(255, 159, 10, 0.35);
+}
+
+.sinus-relief-banner.stage-transition {
+    background: linear-gradient(135deg, rgba(255, 214, 10, 0.15), rgba(102, 217, 239, 0.08));
+    border-color: rgba(255, 214, 10, 0.35);
+}
+
+.sinus-relief-banner.stage-breakthrough {
+    background: linear-gradient(135deg, rgba(166, 226, 46, 0.2), rgba(102, 217, 239, 0.15), rgba(174, 129, 255, 0.12));
+    border-color: rgba(166, 226, 46, 0.5);
+    box-shadow: 0 0 20px rgba(166, 226, 46, 0.18);
+    animation: cleanAirGlow 3s infinite ease-in-out;
+}
+
+.sinus-relief-banner.stage-pristine {
+    background: linear-gradient(135deg, rgba(102, 217, 239, 0.2), rgba(166, 226, 46, 0.2), rgba(48, 209, 88, 0.15));
+    border-color: rgba(102, 217, 239, 0.5);
+    box-shadow: 0 0 22px rgba(102, 217, 239, 0.22);
+    animation: cleanAirGlow 3s infinite ease-in-out;
+}
+
+@keyframes cleanAirGlow {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(166, 226, 46, 0.15);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(102, 217, 239, 0.3);
+    }
+}
+
+.sinus-banner-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.sinus-banner-title-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sinus-banner-icon-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.stage-breakthrough .sinus-banner-icon-badge,
+.stage-pristine .sinus-banner-icon-badge {
+    background: rgba(166, 226, 46, 0.25);
+    color: var(--green);
+}
+
+.stage-transition .sinus-banner-icon-badge {
+    background: rgba(255, 214, 10, 0.2);
+    color: #fcd34d;
+}
+
+.stage-warning .sinus-banner-icon-badge {
+    background: rgba(255, 159, 10, 0.2);
+    color: var(--orange);
+}
+
+.sinus-banner-icon-badge i {
+    width: 16px;
+    height: 16px;
+}
+
+.sinus-banner-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+}
+
+.sinus-meter-pill {
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stage-breakthrough .sinus-meter-pill,
+.stage-pristine .sinus-meter-pill {
+    background: rgba(166, 226, 46, 0.25);
+    color: #a6e22e;
+    border: 1px solid rgba(166, 226, 46, 0.45);
+}
+
+.stage-transition .sinus-meter-pill {
+    background: rgba(255, 214, 10, 0.2);
+    color: #fde047;
+    border: 1px solid rgba(255, 214, 10, 0.35);
+}
+
+.stage-warning .sinus-meter-pill {
+    background: rgba(255, 159, 10, 0.2);
+    color: #fdba74;
+    border: 1px solid rgba(255, 159, 10, 0.35);
+}
+
+.sinus-banner-desc {
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.88);
+}
+
+.sinus-progress-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sinus-progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 0.02em;
+}
+
+.sinus-progress-bar-bg {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 100px;
+    overflow: hidden;
+}
+
+.sinus-progress-bar-fill {
+    height: 100%;
+    border-radius: 100px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stage-warning .sinus-progress-bar-fill {
+    background: linear-gradient(90deg, #ff453a, #ff9f0a);
+}
+
+.stage-transition .sinus-progress-bar-fill {
+    background: linear-gradient(90deg, #ff9f0a, #ffd60a, #a6e22e);
+}
+
+.stage-breakthrough .sinus-progress-bar-fill,
+.stage-pristine .sinus-progress-bar-fill {
+    background: linear-gradient(90deg, #a6e22e, #66d9ef, #ae81ff);
+    box-shadow: 0 0 10px rgba(166, 226, 46, 0.5);
+}
+
+/* --- Leg Air Quality & Sinus Widget --- */
+.aqi-sinus-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+}
+
+.aqi-sinus-row.aqi-pristine {
+    background: linear-gradient(135deg, rgba(166, 226, 46, 0.15), rgba(102, 217, 239, 0.08));
+    border-color: rgba(166, 226, 46, 0.35);
+}
+
+.aqi-sinus-row.aqi-good {
+    background: linear-gradient(135deg, rgba(102, 217, 239, 0.12), rgba(166, 226, 46, 0.06));
+    border-color: rgba(102, 217, 239, 0.3);
+}
+
+.aqi-sinus-row.aqi-moderate {
+    background: linear-gradient(135deg, rgba(255, 214, 10, 0.12), rgba(255, 159, 10, 0.06));
+    border-color: rgba(255, 214, 10, 0.3);
+}
+
+.aqi-sinus-row.aqi-warning {
+    background: linear-gradient(135deg, rgba(255, 159, 10, 0.14), rgba(255, 69, 58, 0.08));
+    border-color: rgba(255, 159, 10, 0.35);
+}
+
+.aqi-tags-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.aqi-status-pill {
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    letter-spacing: 0.02em;
+}
+
+.aqi-pristine .aqi-status-pill {
+    background: rgba(166, 226, 46, 0.25);
+    color: var(--green);
+    border: 1px solid rgba(166, 226, 46, 0.4);
+}
+
+.aqi-good .aqi-status-pill {
+    background: rgba(102, 217, 239, 0.2);
+    color: var(--primary);
+    border: 1px solid rgba(102, 217, 239, 0.35);
+}
+
+.aqi-moderate .aqi-status-pill {
+    background: rgba(255, 214, 10, 0.2);
+    color: #fde047;
+    border: 1px solid rgba(255, 214, 10, 0.35);
+}
+
+.aqi-warning .aqi-status-pill {
+    background: rgba(255, 159, 10, 0.2);
+    color: var(--orange);
+    border: 1px solid rgba(255, 159, 10, 0.35);
+}
+
+.sinus-score-pill {
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.aqi-detail-note {
+    font-size: 11.5px;
+    color: rgba(255, 255, 255, 0.78);
+    font-weight: 400;
+    line-height: 1.35;
+}
+
 /* --- Leg Cards Section --- */
 .legs-section {
     display: flex;

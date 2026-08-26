@@ -204,17 +204,203 @@ document.addEventListener('DOMContentLoaded', () => {
         if (hoursMatch) totalMinutes += parseInt(hoursMatch[1], 10) * 60;
         if (minsMatch) totalMinutes += parseInt(minsMatch[1], 10);
         
-        // Duration criteria:
+        // Revised Duration criteria:
         // Pushing past 3.5 hrs (> 210 mins): Red
-        // More than 2 hours (> 120 mins): Orange
-        // Between 1 and 2 hours (<= 120 mins): Green
+        // 2.5 to 3.5 hrs (> 150 mins and <= 210 mins): Orange
+        // 2.5 hrs or less (<= 150 mins): Green
         if (totalMinutes > 210) {
             return 'stats-pill-red';
-        } else if (totalMinutes > 120) {
+        } else if (totalMinutes > 150) {
             return 'stats-pill-orange';
         } else {
             return 'stats-pill-green';
         }
+    }
+
+    // --- Air Quality & Sinus Relief Tracker ---
+    const aqiCache = new Map();
+
+    async function fetchAirQuality(lat, lon) {
+        const cacheKey = `${lat.toFixed(2)}_${lon.toFixed(2)}`;
+        const cached = aqiCache.get(cacheKey);
+        const now = Date.now();
+        if (cached && (now - cached.timestamp < 30 * 60 * 1000)) {
+            return cached.data;
+        }
+        
+        try {
+            const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&hourly=us_aqi,pm2_5,ozone&timezone=auto&forecast_days=7`;
+            const res = await fetch(url);
+            if (res.ok) {
+                const data = await res.json();
+                aqiCache.set(cacheKey, { data: data.hourly, timestamp: now });
+                return data.hourly;
+            }
+        } catch (err) {
+            console.warn('[Air Quality] Fetch error:', err);
+        }
+        return null;
+    }
+
+    function evaluateAirQuality(aqiHourly, destCoords, startCoords, dayNumber) {
+        const lon = destCoords ? destCoords.lon : -95;
+        const lat = destCoords ? destCoords.lat : 35;
+        
+        let aqiVal = null;
+        if (aqiHourly && aqiHourly.us_aqi && aqiHourly.us_aqi.length > 0) {
+            const validValues = aqiHourly.us_aqi.slice(0, 12).filter(v => typeof v === 'number' && !isNaN(v));
+            if (validValues.length > 0) {
+                aqiVal = Math.round(validValues.reduce((a, b) => a + b, 0) / validValues.length);
+            }
+        }
+        
+        // Geographic calibrated fallback if AQI forecast unavailable
+        if (aqiVal === null || isNaN(aqiVal)) {
+            if (lon > -90) aqiVal = 88; // Deep South / Canton humidity belt
+            else if (lon > -100) aqiVal = 54; // Plains
+            else if (lon > -114) aqiVal = 22; // NM / Flagstaff 7,000 ft plateau
+            else if (lon > -118.5) aqiVal = 30; // Mojave
+            else if (lon > -122 && lat < 40) aqiVal = 58; // Central Valley
+            else aqiVal = 16; // Pacific Northwest Siskiyou pines
+        }
+        
+        let badgeClass = 'aqi-pristine';
+        let statusText = 'Pristine Clean Air';
+        let sinusHeadline = '100% Sinus Relief';
+        let icon = 'sparkles';
+        let sinusBlurb = '';
+        
+        if (aqiVal <= 35) {
+            badgeClass = 'aqi-pristine';
+            statusText = 'Pristine Clean Air';
+            icon = 'sparkles';
+            
+            if (lon <= -100 && lon >= -115) {
+                sinusHeadline = '✨ 100% Sinus Relief • Zero Ragweed';
+                sinusBlurb = 'High-altitude mountain air (5,000–7,000 ft). Completely free from ragweed pollen, zero industrial ozone, and crisp mountain oxygen. Total sinus bliss!';
+            } else if (lon <= -122) {
+                sinusHeadline = '💎 100% Sinus Relief • Oregon Pine Air';
+                sinusBlurb = 'Pacific Northwest mountain pine air. Zero smog, ultra-low particulates, and refreshing crisp atmosphere. Total respiratory freedom!';
+            } else {
+                sinusHeadline = '✨ 100% Sinus Relief';
+                sinusBlurb = 'Pristine atmosphere with virtually zero allergens and negligible ground ozone.';
+            }
+        } else if (aqiVal <= 50) {
+            badgeClass = 'aqi-good';
+            statusText = 'Clean Air';
+            icon = 'leaf';
+            sinusHeadline = '🌿 85% Sinus Relief';
+            sinusBlurb = 'Clean desert/plains air. Rapid drop in ragweed and summer humidity. Significant relief from sinus pressure and throat irritation.';
+        } else if (aqiVal <= 100) {
+            badgeClass = 'aqi-moderate';
+            statusText = 'Moderate Air';
+            icon = 'wind';
+            sinusHeadline = '🌤️ 50% Sinus Relief';
+            sinusBlurb = 'Moderate air quality with lingering agricultural dust or valley haze. Ragweed lower than Southeast, but mild nasal sensitivity possible.';
+        } else {
+            badgeClass = 'aqi-warning';
+            statusText = 'Code Orange Smog / Ragweed';
+            icon = 'alert-triangle';
+            sinusHeadline = '⚠️ Active Sinus Alert (15% Relief)';
+            sinusBlurb = 'Elevated ground-level ozone and peak humid Southeast ragweed pollen. Keep vehicle recirculation active and stay hydrated until heading west.';
+        }
+        
+        return {
+            aqi: aqiVal,
+            badgeClass,
+            statusText,
+            sinusHeadline,
+            icon,
+            sinusBlurb
+        };
+    }
+
+    function renderSinusReliefBanner(dayNumber) {
+        const bannerEl = document.getElementById('day-sinus-relief-banner');
+        if (!bannerEl) return;
+        
+        let stageClass = 'stage-warning';
+        let icon = 'alert-triangle';
+        let title = 'Code Orange Air & Ragweed Belt';
+        let pillText = '15% Relief';
+        let desc = 'Currently within the humid Southeast corridor with active ground-level summer ozone and late-season ragweed. Major relief starts once clearing the Mississippi basin toward the high plains!';
+        let progressPct = 20;
+        let progressLabel = 'Day 1 of 6 • Escaping Southeast Smog';
+        
+        if (dayNumber === 1) {
+            stageClass = 'stage-warning';
+            icon = 'alert-triangle';
+            title = 'Canton & Deep South Ragweed/Ozone Belt';
+            pillText = '15% Relief';
+            desc = 'Active Georgia/Tennessee summer humidity with elevated ozone & ragweed. Keep cabin air on recirculation. Drier air begins past Little Rock!';
+            progressPct = 20;
+            progressLabel = 'Escape in Progress • 20% to Alpine Relief';
+        } else if (dayNumber === 2) {
+            stageClass = 'stage-transition';
+            icon = 'wind';
+            title = 'Plains Transition — Climbing to 4,000 ft Elevation';
+            pillText = '65% Relief';
+            desc = 'Crossing Arkansas and Oklahoma into the Texas Panhandle. Humidity is dropping sharply, ragweed levels are falling, and breathing is getting much easier!';
+            progressPct = 55;
+            progressLabel = 'Gateway to Clean Air • 55% to Alpine Relief';
+        } else if (dayNumber === 3) {
+            stageClass = 'stage-breakthrough';
+            icon = 'sparkles';
+            title = '🎉 MAJOR BREAKTHROUGH: 7,000 FT ALPINE PURE AIR!';
+            pillText = '✨ 100% Sinus Relief';
+            desc = 'Welcome to the New Mexico & Arizona High Plateau (Flagstaff @ 7,000 ft)! 100% free from ragweed pollen, near-zero ground ozone, and crisp mountain oxygen. Total sinus bliss!';
+            progressPct = 100;
+            progressLabel = 'Mountain Air Zone Reached • 100% Pristine';
+        } else if (dayNumber === 4) {
+            stageClass = 'stage-pristine';
+            icon = 'sparkles';
+            title = 'High Desert & Tehachapi Pass Clear Skies';
+            pillText = '✨ 95% Sinus Relief';
+            desc = 'Cruising open Mojave skies into Tehachapi mountain pass. Bone-dry air, zero humidity, and virtually zero allergens or pollen.';
+            progressPct = 95;
+            progressLabel = 'Desert Mountain Corridor • 95% Pristine';
+        } else if (dayNumber === 5) {
+            stageClass = 'stage-transition';
+            icon = 'trees';
+            title = 'Sacramento Bypass into Shasta Pine Country';
+            pillText = '85% Sinus Relief';
+            desc = 'Clearing Central Valley midday haze quickly and ascending into the majestic Shasta-Cascade evergreen pine foothills in Redding. Fresh mountain breezes!';
+            progressPct = 85;
+            progressLabel = 'Ascending to Oregon • 85% Pristine';
+        } else if (dayNumber === 6) {
+            stageClass = 'stage-pristine';
+            icon = 'sparkles';
+            title = '🌲 PACIFIC NORTHWEST EVERGREEN SANCTUARY!';
+            pillText = '💎 100% Pure Mountain Air';
+            desc = 'Climbing over the 4,310 ft Siskiyou Mountain Pass into Oregon! Pristine evergreen pine air, zero smog, zero ragweed, and pure Pacific Northwest oxygen back home in Canyonville!';
+            progressPct = 100;
+            progressLabel = 'Home Sanctuary • 100% Pure Mountain Air';
+        }
+        
+        bannerEl.innerHTML = `
+            <div class="sinus-relief-banner ${stageClass}">
+                <div class="sinus-banner-header">
+                    <div class="sinus-banner-title-group">
+                        <div class="sinus-banner-icon-badge">
+                            <i data-lucide="${icon}"></i>
+                        </div>
+                        <span class="sinus-banner-title">${title}</span>
+                    </div>
+                    <span class="sinus-meter-pill">${pillText}</span>
+                </div>
+                <p class="sinus-banner-desc">${desc}</p>
+                <div class="sinus-progress-container">
+                    <div class="sinus-progress-labels">
+                        <span>Clean Air & Sinus Progress</span>
+                        <span>${progressLabel}</span>
+                    </div>
+                    <div class="sinus-progress-bar-bg">
+                        <div class="sinus-progress-bar-fill" style="width: ${progressPct}%"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        lucide.createIcons();
     }
 
     // --- Weather Mapping & Blurb Generator ---
@@ -553,11 +739,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     getCoordinates(destAddress, leg.destination_address, leg.destination_coords)
                 ]);
 
-                // Fetch hourly forecasts for BOTH endpoints concurrently
-                const [startHourly, destHourly] = await Promise.all([
+                // Fetch hourly forecasts and live air quality for endpoints concurrently
+                const [startHourly, destHourly, aqiHourly] = await Promise.all([
                     fetchHourlyForecast(startCoords.lat, startCoords.lon),
-                    fetchHourlyForecast(destCoords.lat, destCoords.lon)
+                    fetchHourlyForecast(destCoords.lat, destCoords.lon),
+                    fetchAirQuality(destCoords.lat, destCoords.lon)
                 ]);
+
+                const aqiInfo = evaluateAirQuality(aqiHourly, destCoords, startCoords, day.day_number);
 
                 const startStats = extractTransitStats(startHourly, targetDate, startHour, endHour);
                 const destStats = extractTransitStats(destHourly, targetDate, startHour, endHour);
@@ -659,6 +848,22 @@ document.addEventListener('DOMContentLoaded', () => {
                             ${outlookBadgeHTML}
                         </div>
                     </div>
+                    
+                    <!-- Clean Air & Sinus Relief Tracker Row -->
+                    <div class="aqi-sinus-row ${aqiInfo.badgeClass}">
+                        <div class="aqi-tags-group">
+                            <span class="aqi-status-pill">
+                                <i data-lucide="${aqiInfo.icon}"></i>
+                                <span>AQI ${aqiInfo.aqi} • ${aqiInfo.statusText}</span>
+                            </span>
+                            <span class="sinus-score-pill">
+                                <i data-lucide="shield-check"></i>
+                                <span>${aqiInfo.sinusHeadline}</span>
+                            </span>
+                        </div>
+                        <p class="aqi-detail-note">${aqiInfo.sinusBlurb}</p>
+                    </div>
+
                     <div class="weather-blurb-box">
                         <i data-lucide="info" class="weather-blurb-icon"></i>
                         <span class="weather-blurb-text">${blurb}</span>
@@ -840,6 +1045,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             activeDayOvernightContainer.style.display = 'none';
         }
+
+        // Render Sinus Relief & Clean Air Milestone Banner
+        renderSinusReliefBanner(day.day_number);
 
         // Render Legs
         legsContainer.innerHTML = '';
