@@ -702,7 +702,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const dayPill = document.getElementById('day-weather-summary-pill');
                     if (dayPill) {
-                        dayPill.style.display = 'inline-flex';
+                        dayPill.style.display = 'flex';
                         dayPill.innerHTML = `
                             <i data-lucide="${dayMeta.icon}"></i>
                             <span>Daily: High ${dailyHigh}°F • Low ${dailyLow}°F (${dayMeta.text})</span>
@@ -1105,23 +1105,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     : (day.legs[index-1] ? getFacilityInfo(day.legs[index-1].destination_type) : { icon: 'map-pin' });
                 
                 startAddressHTML = `
-                    <div class="address-block address-block-start">
-                        <div class="address-block-header">
-                            <div class="address-title-row">
-                                <span class="section-eyebrow">Starting From</span>
-                                ${customStart ? '<span class="badge badge-orange">Edited</span>' : ''}
+                    <div class="waypoint-subcard waypoint-start">
+                        <div class="waypoint-subcard-header">
+                            <div class="waypoint-type-tag">
+                                <i data-lucide="circle-dot"></i>
+                                <span>Departure Point</span>
                             </div>
-                            <button class="btn-edit-address" data-leg-id="${legId}" data-type="start" data-original="${leg.start_address || ''}">
+                            <button class="btn-edit-address" data-leg-id="${legId}" data-type="start" data-original="${leg.start_address || ''}" title="Edit Origin Address">
                                 <i data-lucide="pencil"></i>
                             </button>
                         </div>
                         ${leg.start_name ? `
-                        <div class="venue-start-row">
-                            <i data-lucide="${startFacility.icon}" class="venue-start-icon"></i>
-                            <span class="venue-start-text">${leg.start_name}</span>
+                        <div class="waypoint-venue-name">
+                            <i data-lucide="${startFacility.icon}"></i>
+                            <strong>${leg.start_name}</strong>
                         </div>
                         ` : ''}
-                        <p class="address-text">${activeStart}</p>
+                        <p class="waypoint-address-text">${activeStart}</p>
                     </div>
                 `;
             }
@@ -1129,39 +1129,24 @@ document.addEventListener('DOMContentLoaded', () => {
             let destAddressHTML = '';
             if (activeDest) {
                 destAddressHTML = `
-                    <div class="address-block address-block-destination">
-                        <div class="address-block-header">
-                            <div class="address-title-row">
-                                <span class="section-eyebrow">Navigate To</span>
-                                <span class="badge ${destBadgeClass}">${destLabel}</span>
+                    <div class="waypoint-subcard waypoint-dest">
+                        <div class="waypoint-subcard-header">
+                            <div class="waypoint-type-tag waypoint-type-dest">
+                                <i data-lucide="${destIcon}"></i>
+                                <span>${destLabel}</span>
                                 ${customDest ? '<span class="badge badge-orange">Edited</span>' : ''}
                             </div>
-                            <button class="btn-edit-address" data-leg-id="${legId}" data-type="dest" data-original="${leg.destination_address || ''}">
+                            <button class="btn-edit-address" data-leg-id="${legId}" data-type="dest" data-original="${leg.destination_address || ''}" title="Edit Destination Address">
                                 <i data-lucide="pencil"></i>
                             </button>
                         </div>
                         ${leg.destination_name ? `
-                        <div class="venue-highlight-row">
-                            <i data-lucide="${destIcon}" class="venue-icon"></i>
-                            <span class="venue-name-text">${leg.destination_name}</span>
+                        <div class="waypoint-venue-name waypoint-dest-name">
+                            <i data-lucide="${destIcon}"></i>
+                            <strong>${leg.destination_name}</strong>
                         </div>
                         ` : ''}
-                        <p class="address-text">${activeDest}</p>
-                    </div>
-                `;
-            }
-
-            let navigationActionsHTML = '';
-            if (activeDest) {
-                navigationActionsHTML = `
-                    <div class="leg-actions">
-                        <button class="btn btn-green btn-nav-directions" data-destination="${activeDest}">
-                            <i data-lucide="navigation"></i>
-                            <span>Start Directions</span>
-                        </button>
-                        <button class="btn btn-secondary btn-icon-only btn-copy-address" data-address="${activeDest}" title="Copy Address">
-                            <i data-lucide="copy"></i>
-                        </button>
+                        <p class="waypoint-address-text">${activeDest}</p>
                     </div>
                 `;
             }
@@ -1180,70 +1165,96 @@ document.addEventListener('DOMContentLoaded', () => {
             card.innerHTML = `
                 ${bannerHTML}
                 
+                <!-- 1. CARD TOP HEADER -->
                 <div class="leg-card-header">
                     <div class="leg-title-area">
                         <div class="leg-title-row">
+                            <span class="leg-order-badge">Leg ${index + 1}</span>
                             <h3>${leg.name}</h3>
-                            ${leg.destination_name ? `
-                            <span class="leg-title-separator">•</span>
-                            <span class="leg-title-destination">${leg.destination_name}</span>
-                            ` : ''}
                         </div>
+                        ${leg.destination_name ? `
+                        <div class="leg-dest-subheading ${destFacility.boxClass}">
+                            <i data-lucide="${destIcon}"></i>
+                            <span>${destFacility.calloutPrefix}: <strong>${leg.destination_name}</strong></span>
+                        </div>
+                        ` : ''}
                     </div>
-                    <span class="leg-time-window">
-                        <i data-lucide="clock"></i>
-                        <span>${leg.departs} – ${leg.arrives}</span>
-                    </span>
+                    <div class="leg-header-badges">
+                        <span class="leg-time-window">
+                            <i data-lucide="clock"></i>
+                            <span>${leg.departs} – ${leg.arrives}</span>
+                        </span>
+                    </div>
                 </div>
 
-                ${leg.destination_name ? `
-                <div class="stop-callout-box ${destFacility.boxClass}">
-                    <div class="stop-callout-icon-badge">
-                        <i data-lucide="${destIcon}"></i>
-                    </div>
-                    <div class="stop-callout-content">
-                        <span class="stop-callout-label">${destFacility.calloutPrefix}</span>
-                        <strong class="stop-callout-name">${leg.destination_name}</strong>
-                    </div>
+                <!-- 2. TOP PROMINENT NAVIGATION ACTION BAR -->
+                ${activeDest ? `
+                <div class="top-nav-action-bar">
+                    <button class="btn btn-green btn-nav-directions btn-nav-primary" data-destination="${activeDest}">
+                        <i data-lucide="navigation"></i>
+                        <span>Start Directions</span>
+                    </button>
+                    <button class="btn btn-secondary btn-copy-address" data-address="${activeDest}" title="Copy Address">
+                        <i data-lucide="copy"></i>
+                        <span>Copy Address</span>
+                    </button>
                 </div>
                 ` : ''}
 
-                <hr class="card-divider" style="margin-bottom: var(--space-lg);">
-
-                <!-- Dynamic Road Weather Widget Container -->
-                <div class="weather-widget" id="weather-widget-${legId}">
-                    <div class="weather-skeleton">
-                        <div class="skeleton-line skeleton-short"></div>
-                        <div class="skeleton-line skeleton-long"></div>
+                <!-- 3. SECTION: 📍 WAYPOINTS & ADDRESSES -->
+                <div class="leg-section-box section-waypoints">
+                    <div class="card-section-label">
+                        <i data-lucide="map-pin"></i>
+                        <span>Waypoints & Addresses</span>
+                    </div>
+                    <div class="waypoints-grid">
+                        ${startAddressHTML}
+                        ${destAddressHTML}
                     </div>
                 </div>
 
-                <div class="leg-addresses-container">
-                    ${startAddressHTML}
-                    ${destAddressHTML}
-                </div>
-
-                ${navigationActionsHTML}
-
-                <div class="leg-details-info">
-                    <div class="route-details-box">
-                        <span class="section-eyebrow">Route Details</span>
+                <!-- 4. SECTION: 🗺️ ROUTE & HIGHWAY TRANSIT -->
+                <div class="leg-section-box section-route">
+                    <div class="card-section-label">
+                        <i data-lucide="compass"></i>
+                        <span>Route Details</span>
+                    </div>
+                    <div class="route-details-row">
                         <p class="route-desc-text">${routePath}</p>
                         ${statsPillHTML}
                     </div>
-                    
-                    <div class="operational-notes-box">
-                        <span class="section-eyebrow">Operational Notes</span>
-                        <p class="notes-text">${leg.operational_notes}</p>
+                </div>
+
+                <!-- 5. SECTION: 🌤️ CORRIDOR WEATHER & SINUS RELIEF -->
+                <div class="leg-section-box section-weather">
+                    <div class="card-section-label">
+                        <i data-lucide="cloud-sun"></i>
+                        <span>Weather & Air Quality</span>
+                    </div>
+                    <div class="weather-widget" id="weather-widget-${legId}">
+                        <div class="weather-skeleton">
+                            <div class="skeleton-line skeleton-short"></div>
+                            <div class="skeleton-line skeleton-long"></div>
+                        </div>
                     </div>
                 </div>
 
-                <hr class="card-divider" style="margin-bottom: var(--space-lg);">
+                <!-- 6. SECTION: 📝 OPERATIONAL NOTES & STRATEGY -->
+                <div class="leg-section-box section-notes">
+                    <div class="card-section-label">
+                        <i data-lucide="file-text"></i>
+                        <span>Operational Notes</span>
+                    </div>
+                    <p class="notes-text">${leg.operational_notes}</p>
+                </div>
 
-                <button class="btn btn-completion btn-toggle-completion" data-leg-id="${legId}">
-                    <i data-lucide="${isCompleted ? 'check-square' : 'square'}"></i>
-                    <span>${isCompleted ? 'Completed' : 'Mark as Done'}</span>
-                </button>
+                <!-- 7. CARD FOOTER -->
+                <div class="leg-card-footer">
+                    <button class="btn btn-completion btn-toggle-completion" data-leg-id="${legId}">
+                        <i data-lucide="${isCompleted ? 'check-square' : 'square'}"></i>
+                        <span>${isCompleted ? 'Completed' : 'Mark as Done'}</span>
+                    </button>
+                </div>
             `;
 
             // Append card
