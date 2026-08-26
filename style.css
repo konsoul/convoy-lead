@@ -161,6 +161,12 @@ h3 {
     border: 1px solid rgba(10, 132, 255, 0.25);
 }
 
+.badge-green {
+    background-color: rgba(166, 226, 46, 0.15);
+    color: var(--green);
+    border: 1px solid rgba(166, 226, 46, 0.3);
+}
+
 .badge-orange {
     background-color: rgba(255, 159, 10, 0.12);
     color: var(--orange);
@@ -595,19 +601,144 @@ h3 {
 .leg-card-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-lg);
+    align-items: flex-start;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
 }
 
 .leg-title-area {
     display: flex;
     flex-direction: column;
-    gap: var(--space-xs);
+    gap: 4px;
 }
 
-.leg-title-area h3 {
+.leg-title-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.leg-title-row h3 {
     font-size: 1.15rem;
+    color: #ffffff;
+    font-weight: 700;
     transition: color var(--transition-normal), text-decoration var(--transition-normal);
+}
+
+.leg-title-separator {
+    color: rgba(255, 255, 255, 0.3);
+    font-weight: 600;
+}
+
+.leg-title-destination {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+/* Stop Callout Box */
+.stop-callout-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: var(--space-lg);
+    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.stop-callout-box.stop-fuel {
+    background: linear-gradient(135deg, rgba(166, 226, 46, 0.12), rgba(102, 217, 239, 0.04));
+    border-color: rgba(166, 226, 46, 0.28);
+}
+
+.stop-callout-box.stop-travel-plaza {
+    background: linear-gradient(135deg, rgba(174, 129, 255, 0.14), rgba(102, 217, 239, 0.04));
+    border-color: rgba(174, 129, 255, 0.3);
+}
+
+.stop-callout-box.stop-hotel {
+    background: linear-gradient(135deg, rgba(10, 132, 255, 0.14), rgba(174, 129, 255, 0.04));
+    border-color: rgba(10, 132, 255, 0.3);
+}
+
+.stop-callout-box.stop-home {
+    background: linear-gradient(135deg, rgba(255, 159, 10, 0.14), rgba(255, 69, 58, 0.04));
+    border-color: rgba(255, 159, 10, 0.3);
+}
+
+.stop-callout-icon-badge {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.stop-fuel .stop-callout-icon-badge {
+    background: rgba(166, 226, 46, 0.2);
+    color: var(--green);
+}
+
+.stop-travel-plaza .stop-callout-icon-badge {
+    background: rgba(174, 129, 255, 0.2);
+    color: var(--accent);
+}
+
+.stop-hotel .stop-callout-icon-badge {
+    background: rgba(10, 132, 255, 0.2);
+    color: var(--primary);
+}
+
+.stop-home .stop-callout-icon-badge {
+    background: rgba(255, 159, 10, 0.2);
+    color: var(--orange);
+}
+
+.stop-callout-icon-badge i {
+    width: 18px;
+    height: 18px;
+}
+
+.stop-callout-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.stop-callout-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.stop-fuel .stop-callout-label {
+    color: var(--green);
+}
+
+.stop-travel-plaza .stop-callout-label {
+    color: var(--accent);
+}
+
+.stop-hotel .stop-callout-label {
+    color: var(--primary);
+}
+
+.stop-home .stop-callout-label {
+    color: var(--orange);
+}
+
+.stop-callout-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #ffffff;
+    line-height: 1.3;
 }
 
 .leg-time-window {
@@ -624,6 +755,7 @@ h3 {
     letter-spacing: 0.04em;
     border: 1px solid rgba(10, 132, 255, 0.2);
     transition: all var(--transition-normal);
+    flex-shrink: 0;
 }
 
 .leg-time-window i {
@@ -681,15 +813,72 @@ h3 {
     height: 15px;
 }
 
-.address-text {
+/* Venue Highlight Display */
+.venue-highlight-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.venue-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.venue-name-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+}
+
+.venue-start-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.venue-start-icon {
+    width: 14px;
+    height: 14px;
+    color: rgba(255, 255, 255, 0.4);
+    flex-shrink: 0;
+}
+
+.venue-start-text {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.leg-destination-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 2px;
+}
+
+.leg-destination-tag i {
+    width: 14px;
+    height: 14px;
+    color: var(--primary);
+}
+
+.address-text {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.55);
 }
 
 .address-block-destination .address-text {
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 15px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13.5px;
 }
 
 /* Action Buttons inside Leg */

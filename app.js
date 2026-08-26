@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Initialize Trip Start Date
             initTripStartDate();
 
-            const response = await fetch('itinerary.json');
+            const response = await fetch(`itinerary.json?t=${Date.now()}`, { cache: 'no-store' });
             if (!response.ok) {
                 throw new Error('Failed to load itinerary.json');
             }
@@ -147,6 +147,51 @@ document.addEventListener('DOMContentLoaded', () => {
             return address;
         }
         return parts[0];
+    }
+
+    function getFacilityInfo(type) {
+        switch (type) {
+            case 'travel_stop':
+                return { 
+                    label: 'Travel Plaza Stop', 
+                    badgeClass: 'badge-accent', 
+                    icon: 'fuel', 
+                    boxClass: 'stop-travel-plaza',
+                    calloutPrefix: 'Fuel & Staging Stop'
+                };
+            case 'gas_station':
+                return { 
+                    label: 'Gas Station Stop', 
+                    badgeClass: 'badge-green', 
+                    icon: 'fuel', 
+                    boxClass: 'stop-fuel',
+                    calloutPrefix: 'Fuel & Rest Stop'
+                };
+            case 'hotel':
+                return { 
+                    label: 'Overnight Hotel', 
+                    badgeClass: 'badge-primary', 
+                    icon: 'bed', 
+                    boxClass: 'stop-hotel',
+                    calloutPrefix: 'Overnight Hotel'
+                };
+            case 'home':
+                return { 
+                    label: 'Final Terminus', 
+                    badgeClass: 'badge-orange', 
+                    icon: 'home', 
+                    boxClass: 'stop-home',
+                    calloutPrefix: 'Final Trip Destination'
+                };
+            default:
+                return { 
+                    label: 'Waypoint Stop', 
+                    badgeClass: 'badge-primary', 
+                    icon: 'map-pin', 
+                    boxClass: 'stop-fuel',
+                    calloutPrefix: 'Waypoint Destination'
+                };
+        }
     }
 
     // --- Weather Mapping & Blurb Generator ---
@@ -816,8 +861,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             }
 
+            // Resolve Facility Information
+            const destFacility = getFacilityInfo(leg.destination_type);
+            const destIcon = destFacility.icon;
+            const destBadgeClass = destFacility.badgeClass;
+            const destLabel = destFacility.label;
+
             let startAddressHTML = '';
             if (activeStart) {
+                const startFacility = (index === 0) 
+                    ? { icon: 'map-pin' } 
+                    : (day.legs[index-1] ? getFacilityInfo(day.legs[index-1].destination_type) : { icon: 'map-pin' });
+                
                 startAddressHTML = `
                     <div class="address-block address-block-start">
                         <div class="address-block-header">
@@ -829,6 +884,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <i data-lucide="pencil"></i>
                             </button>
                         </div>
+                        ${leg.start_name ? `
+                        <div class="venue-start-row">
+                            <i data-lucide="${startFacility.icon}" class="venue-start-icon"></i>
+                            <span class="venue-start-text">${leg.start_name}</span>
+                        </div>
+                        ` : ''}
                         <p class="address-text">${activeStart}</p>
                     </div>
                 `;
@@ -841,12 +902,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="address-block-header">
                             <div class="address-title-row">
                                 <span class="section-eyebrow">Navigate To</span>
+                                <span class="badge ${destBadgeClass}">${destLabel}</span>
                                 ${customDest ? '<span class="badge badge-orange">Edited</span>' : ''}
                             </div>
                             <button class="btn-edit-address" data-leg-id="${legId}" data-type="dest" data-original="${leg.destination_address || ''}">
                                 <i data-lucide="pencil"></i>
                             </button>
                         </div>
+                        ${leg.destination_name ? `
+                        <div class="venue-highlight-row">
+                            <i data-lucide="${destIcon}" class="venue-icon"></i>
+                            <span class="venue-name-text">${leg.destination_name}</span>
+                        </div>
+                        ` : ''}
                         <p class="address-text">${activeDest}</p>
                     </div>
                 `;
@@ -882,13 +950,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 <div class="leg-card-header">
                     <div class="leg-title-area">
-                        <h3>${leg.name}</h3>
+                        <div class="leg-title-row">
+                            <h3>${leg.name}</h3>
+                            ${leg.destination_name ? `
+                            <span class="leg-title-separator">•</span>
+                            <span class="leg-title-destination">${leg.destination_name}</span>
+                            ` : ''}
+                        </div>
                     </div>
                     <span class="leg-time-window">
                         <i data-lucide="clock"></i>
                         <span>${leg.departs} – ${leg.arrives}</span>
                     </span>
                 </div>
+
+                ${leg.destination_name ? `
+                <div class="stop-callout-box ${destFacility.boxClass}">
+                    <div class="stop-callout-icon-badge">
+                        <i data-lucide="${destIcon}"></i>
+                    </div>
+                    <div class="stop-callout-content">
+                        <span class="stop-callout-label">${destFacility.calloutPrefix}</span>
+                        <strong class="stop-callout-name">${leg.destination_name}</strong>
+                    </div>
+                </div>
+                ` : ''}
 
                 <hr class="card-divider" style="margin-bottom: var(--space-lg);">
 
