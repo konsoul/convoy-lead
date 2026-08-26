@@ -6,13 +6,18 @@
       "start_location": "Canton, GA",
       "end_location": "Little Rock, AR",
       "hotel": "Holiday Inn Express & Suites Little Rock-West",
+      "hotel_info": {
+        "parking_note": "Oversized & trailer parking available in rear lot; well-lit with easy turning radius",
+        "breakfast": "Free Hot Express Start Breakfast (6:00 AM – 9:30 AM)",
+        "amenities": ["Convoy Parking", "Free Breakfast", "EV Charging", "Pool"]
+      },
       "target": "Establish a clean interstate baseline west on I-75/I-24/I-40 while clearing Nashville and Memphis during off-peak windows.",
       "legs": [
         {
           "name": "Morning Stretch",
           "departs": "08:30 AM",
           "arrives": "09:42 AM",
-          "route_details": "Canton, GA \u2192 1165 AEDC Rd, Hillsboro, TN 37342 (138 miles, approx. 2 hrs 12 mins)",
+          "route_details": "Canton, GA → 1165 AEDC Rd, Hillsboro, TN 37342 (138 miles, approx. 2 hrs 12 mins)",
           "operational_notes": "GA-20 W to I-75 N through Chattanooga (passes at 9:35 AM EDT well after morning rush), over Monteagle on I-24 W. Gains 1 hour across time zone line (EDT to CDT). Plan a 30-minute fueling and staging break at Love's #764 upon arrival.",
           "start_name": "Canton, GA (Origin)",
           "start_address": "Canton, GA",
@@ -20,13 +25,17 @@
           "destination_name": "Love's Travel Stop (#764)",
           "destination_type": "travel_stop",
           "destination_address": "1165 AEDC Road, Hillsboro, TN 37342",
-          "destination_coords": { "lat": 35.4055, "lon": -86.0125 }
+          "destination_coords": { "lat": 35.4055, "lon": -86.0125 },
+          "fuel_stint_miles": 138,
+          "timezone_change": "Gain 1 Hr (EDT ➔ CDT)",
+          "amenities": ["Love's Travel Stop", "Subway", "DEF at Pump", "Dog Park"],
+          "pass_name": "Monteagle Pass (I-24 Grade)"
         },
         {
           "name": "Midday Run",
           "departs": "10:12 AM",
           "arrives": "12:57 PM",
-          "route_details": "1165 AEDC Rd, Hillsboro, TN 37342 \u2192 2050 Highway 70 E, Jackson, TN 38305 (190 miles, approx. 2 hrs 45 mins)",
+          "route_details": "1165 AEDC Rd, Hillsboro, TN 37342 → 2050 Highway 70 E, Jackson, TN 38305 (190 miles, approx. 2 hrs 45 mins)",
           "operational_notes": "Follows I-24 W past Murfreesboro to the I-840/I-440 bypass to I-40 W directly to Love's Travel Stop in Jackson (Exit 87). Passes Nashville at 11:15 AM in open midday traffic. Plan a 30-minute lunch and fueling break.",
           "start_name": "Love's Travel Stop (#764)",
           "start_address": "1165 AEDC Road, Hillsboro, TN 37342",
@@ -34,13 +43,15 @@
           "destination_name": "Love's Travel Stop (Exit 87)",
           "destination_type": "travel_stop",
           "destination_address": "2050 Highway 70 E, Jackson, TN 38305",
-          "destination_coords": { "lat": 35.6558, "lon": -88.7562 }
+          "destination_coords": { "lat": 35.6558, "lon": -88.7562 },
+          "fuel_stint_miles": 190,
+          "amenities": ["Love's Travel Stop", "Chester's Chicken", "Godfather's Pizza", "DEF"]
         },
         {
           "name": "Evening Stretch",
           "departs": "01:27 PM",
           "arrives": "04:47 PM",
-          "route_details": "2050 Highway 70 E, Jackson, TN 38305 \u2192 4900 Talley Road, Little Rock, AR 72204 (222 miles, approx. 3 hrs 20 mins)",
+          "route_details": "2050 Highway 70 E, Jackson, TN 38305 → 4900 Talley Road, Little Rock, AR 72204 (222 miles, approx. 3 hrs 20 mins)",
           "operational_notes": "Crosses the Mississippi River at Memphis around 2:40 PM straight into Little Rock on I-40 W to I-430 S. Arrives at Day 1 hotel destination right off Exit 4 by 4:47 PM.",
           "start_name": "Love's Travel Stop (Exit 87)",
           "start_address": "2050 Highway 70 E, Jackson, TN 38305",
@@ -48,7 +59,9 @@
           "destination_name": "Holiday Inn Express & Suites Little Rock-West",
           "destination_type": "hotel",
           "destination_address": "4900 Talley Road, Little Rock, AR 72204",
-          "destination_coords": { "lat": 34.7317, "lon": -92.3813 }
+          "destination_coords": { "lat": 34.7317, "lon": -92.3813 },
+          "fuel_stint_miles": 222,
+          "amenities": ["Hotel Arrival", "Convoy Parking", "Restaurants Nearby"]
         }
       ]
     },
@@ -58,13 +71,18 @@
       "start_location": "Little Rock, AR",
       "end_location": "Tucumcari, NM",
       "hotel": "Fairfield Inn & Suites Tucumcari",
+      "hotel_info": {
+        "parking_note": "Wide perimeter parking suitable for trucks & trailers; easy pull-through access",
+        "breakfast": "Complimentary Hot Breakfast (6:00 AM – 9:00 AM)",
+        "amenities": ["Convoy Parking", "Free Hot Breakfast", "Indoor Pool", "Pet Friendly"]
+      },
       "target": "Clear Oklahoma City bottleneck during the mid-day commuter dead zone.",
       "legs": [
         {
           "name": "Morning Stretch",
           "departs": "06:00 AM",
           "arrives": "09:35 AM",
-          "route_details": "4900 Talley Rd, Little Rock, AR 72204 \u2192 903 E Trudgeon St, Henryetta, OK 74437 (248 miles, approx. 3 hrs 35 mins)",
+          "route_details": "4900 Talley Rd, Little Rock, AR 72204 → 903 E Trudgeon St, Henryetta, OK 74437 (248 miles, approx. 3 hrs 35 mins)",
           "operational_notes": "Early departure avoids local Little Rock morning commuter buildup. Staging and fueling break at QuikTrip (Exit 237).",
           "start_name": "Holiday Inn Express & Suites Little Rock-West",
           "start_address": "4900 Talley Road, Little Rock, AR 72204",
@@ -72,13 +90,15 @@
           "destination_name": "QuikTrip (QT #78)",
           "destination_type": "gas_station",
           "destination_address": "903 E Trudgeon Street, Henryetta, OK 74437",
-          "destination_coords": { "lat": 35.4418, "lon": -95.9725 }
+          "destination_coords": { "lat": 35.4418, "lon": -95.9725 },
+          "fuel_stint_miles": 248,
+          "amenities": ["QuikTrip Kitchens", "Roller Grill", "Fresh Coffee", "Clean Restrooms"]
         },
         {
           "name": "Midday Run",
           "departs": "10:05 AM",
           "arrives": "01:17 PM",
-          "route_details": "903 E Trudgeon St, Henryetta, OK 74437 \u2192 301 S 4th St, Sayre, OK 73662 (218 miles, approx. 3 hrs 12 mins)",
+          "route_details": "903 E Trudgeon St, Henryetta, OK 74437 → 301 S 4th St, Sayre, OK 73662 (218 miles, approx. 3 hrs 12 mins)",
           "operational_notes": "Passes through the heart of Oklahoma City at approximately 11:15 AM, hitting the optimal lunch-hour lull. Plan a 30-minute break at Southbound Quickstop (Phillips 66) at Exit 20.",
           "start_name": "QuikTrip (QT #78)",
           "start_address": "903 E Trudgeon Street, Henryetta, OK 74437",
@@ -86,13 +106,15 @@
           "destination_name": "Southbound Quickstop (Phillips 66)",
           "destination_type": "gas_station",
           "destination_address": "301 S 4th Street, Sayre, OK 73662",
-          "destination_coords": { "lat": 35.2934, "lon": -99.6418 }
+          "destination_coords": { "lat": 35.2934, "lon": -99.6418 },
+          "fuel_stint_miles": 218,
+          "amenities": ["Phillips 66", "Convenience Store", "Deli & Hot Snacks"]
         },
         {
           "name": "Evening Stretch",
           "departs": "01:47 PM",
           "arrives": "04:14 PM",
-          "route_details": "301 S 4th St, Sayre, OK 73662 \u2192 1901 S Mountain Rd, Tucumcari, NM 88401 (239 miles, approx. 3 hrs 27 mins)",
+          "route_details": "301 S 4th St, Sayre, OK 73662 → 1901 S Mountain Rd, Tucumcari, NM 88401 (239 miles, approx. 3 hrs 27 mins)",
           "operational_notes": "Straightforward tracking along I-40 W directly into the Day 2 overnight hotel location (Fairfield Inn & Suites). Gains 1 hour across time zone line (CDT to MDT).",
           "start_name": "Southbound Quickstop (Phillips 66)",
           "start_address": "301 S 4th Street, Sayre, OK 73662",
@@ -100,7 +122,10 @@
           "destination_name": "Fairfield Inn & Suites by Marriott Tucumcari",
           "destination_type": "hotel",
           "destination_address": "1901 S Mountain Road, Tucumcari, NM 88401",
-          "destination_coords": { "lat": 35.1584, "lon": -103.7258 }
+          "destination_coords": { "lat": 35.1584, "lon": -103.7258 },
+          "fuel_stint_miles": 239,
+          "timezone_change": "Gain 1 Hr (CDT ➔ MDT)",
+          "amenities": ["Hotel Arrival", "Convoy Parking", "Route 66 Diners Nearby"]
         }
       ]
     },
@@ -110,13 +135,18 @@
       "start_location": "Tucumcari, NM",
       "end_location": "Flagstaff, AZ",
       "hotel": "La Quinta Inn & Suites Flagstaff",
+      "hotel_info": {
+        "parking_note": "Designated oversized parking on west side; easy ingress/egress off I-40",
+        "breakfast": "Bright Side Hot Breakfast (6:00 AM – 9:00 AM)",
+        "amenities": ["Convoy Parking", "Free Breakfast", "Pet Friendly (Free)", "High Elevation: 6,900 ft"]
+      },
       "target": "Traverse Albuquerque and the complex 'Big I' interchange smoothly after peak morning hours.",
       "legs": [
         {
           "name": "Morning Stretch",
           "departs": "08:30 AM",
           "arrives": "10:55 AM",
-          "route_details": "1901 S Mountain Rd, Tucumcari, NM 88401 \u2192 650 Juan Tabo Blvd NE, Albuquerque, NM 87123 (167 miles, approx. 2 hrs 25 mins)",
+          "route_details": "1901 S Mountain Rd, Tucumcari, NM 88401 → 650 Juan Tabo Blvd NE, Albuquerque, NM 87123 (167 miles, approx. 2 hrs 25 mins)",
           "operational_notes": "A slightly delayed departure allows Albuquerque's morning rush hour to dissolve entirely before your arrival. 30-minute fueling break at Maverik #621.",
           "start_name": "Fairfield Inn & Suites Tucumcari",
           "start_address": "1901 S Mountain Road, Tucumcari, NM 88401",
@@ -124,35 +154,43 @@
           "destination_name": "Maverik Adventure's First Stop (#621)",
           "destination_type": "gas_station",
           "destination_address": "650 Juan Tabo Boulevard NE, Albuquerque, NM 87123",
-          "destination_coords": { "lat": 35.0789, "lon": -106.5165 }
+          "destination_coords": { "lat": 35.0789, "lon": -106.5165 },
+          "fuel_stint_miles": 167,
+          "amenities": ["Maverik BonFire Grill", "Nitro Cold Brew", "Fresh Tacos & Burritos", "Ethanol-Free Gas"]
         },
         {
           "name": "Midday Run",
           "departs": "11:25 AM",
           "arrives": "01:28 PM",
-          "route_details": "650 Juan Tabo Blvd NE, Albuquerque, NM 87123 \u2192 3540 E Historic Hwy 66, Gallup, NM 87301 (141 miles, approx. 2 hrs 03 mins)",
-          "operational_notes": "Navigates the multi-lane highway splits of the city during clear mid-day traffic. Plan a 30-minute break at Maverik #535.",
+          "route_details": "650 Juan Tabo Blvd NE, Albuquerque, NM 87123 → 3540 E Historic Hwy 66, Gallup, NM 87301 (141 miles, approx. 2 hrs 03 mins)",
+          "operational_notes": "Navigates the multi-lane highway splits of the city during clear mid-day traffic. Crosses Continental Divide (7,275 ft). Plan a 30-minute break at Maverik #535.",
           "start_name": "Maverik Adventure's First Stop (#621)",
           "start_address": "650 Juan Tabo Boulevard NE, Albuquerque, NM 87123",
           "start_coords": { "lat": 35.0789, "lon": -106.5165 },
           "destination_name": "Maverik Adventure's First Stop (#535)",
           "destination_type": "gas_station",
           "destination_address": "3540 E Historic Highway 66, Gallup, NM 87301",
-          "destination_coords": { "lat": 35.5348, "lon": -108.6942 }
+          "destination_coords": { "lat": 35.5348, "lon": -108.6942 },
+          "fuel_stint_miles": 141,
+          "amenities": ["Maverik BonFire Grill", "Fresh Bakery", "DEF at Pump", "RV Dump"],
+          "pass_name": "Continental Divide (7,275 ft)"
         },
         {
           "name": "Evening Stretch",
           "departs": "01:58 PM",
           "arrives": "03:43 PM",
-          "route_details": "3540 E Historic Hwy 66, Gallup, NM 87301 \u2192 2015 S Beulah Blvd, Flagstaff, AZ 86001 (191 miles, approx. 2 hrs 45 mins)",
-          "operational_notes": "Final drive into the Flagstaff hotel (La Quinta Inn & Suites). Note: If traveling during Daylight Saving Time, crossing into Arizona will gain 1 hour, shifting local arrival to 02:43 PM.",
+          "route_details": "3540 E Historic Hwy 66, Gallup, NM 87301 → 2015 S Beulah Blvd, Flagstaff, AZ 86001 (191 miles, approx. 2 hrs 45 mins)",
+          "operational_notes": "Final drive into the Flagstaff hotel (La Quinta Inn & Suites). Note: If traveling during Daylight Saving Time, crossing into Arizona will gain 1 hour, shifting local arrival to 02:43 PM MST.",
           "start_name": "Maverik Adventure's First Stop (#535)",
           "start_address": "3540 E Historic Highway 66, Gallup, NM 87301",
           "start_coords": { "lat": 35.5348, "lon": -108.6942 },
           "destination_name": "La Quinta Inn & Suites by Wyndham Flagstaff",
           "destination_type": "hotel",
           "destination_address": "2015 S Beulah Boulevard, Flagstaff, AZ 86001",
-          "destination_coords": { "lat": 35.1783, "lon": -111.6622 }
+          "destination_coords": { "lat": 35.1783, "lon": -111.6622 },
+          "fuel_stint_miles": 191,
+          "timezone_change": "Gain 1 Hr (MDT ➔ MST/AZ)",
+          "amenities": ["Hotel Arrival", "Mountain Pine Air (6,900 ft)", "Convoy Parking"]
         }
       ]
     },
@@ -162,13 +200,18 @@
       "start_location": "Flagstaff, AZ",
       "end_location": "Tehachapi, CA",
       "hotel": "Fairfield Inn & Suites Tehachapi",
+      "hotel_info": {
+        "parking_note": "Spacious commercial & trailer parking on south lot with easy turning lane access",
+        "breakfast": "Complimentary Hot Breakfast (6:00 AM – 9:30 AM)",
+        "amenities": ["Convoy Parking", "Free Breakfast", "Mountain Pass Rest", "Indoor Pool"]
+      },
       "target": "Steady desert transit with standard highway parameters. No major city bottlenecks.",
       "legs": [
         {
           "name": "Morning Stretch",
           "departs": "08:00 AM",
           "arrives": "09:58 AM",
-          "route_details": "2015 S Beulah Blvd, Flagstaff, AZ 86001 \u2192 6035 E Minerva Ln, Kingman, AZ 86401 (136 miles, approx. 1 hr 58 mins)",
+          "route_details": "2015 S Beulah Blvd, Flagstaff, AZ 86001 → 6035 E Minerva Ln, Kingman, AZ 86401 (136 miles, approx. 1 hr 58 mins)",
           "operational_notes": "Scenic, open drive descending down the I-40 W corridor. Plan a 30-minute fuel stop at Love's Travel Stop #272 (Exit 59).",
           "start_name": "La Quinta Inn & Suites Flagstaff",
           "start_address": "2015 S Beulah Boulevard, Flagstaff, AZ 86001",
@@ -176,35 +219,43 @@
           "destination_name": "Love's Travel Stop (#272)",
           "destination_type": "travel_stop",
           "destination_address": "6035 E Minerva Lane, Kingman, AZ 86401",
-          "destination_coords": { "lat": 35.2341, "lon": -113.9213 }
+          "destination_coords": { "lat": 35.2341, "lon": -113.9213 },
+          "fuel_stint_miles": 136,
+          "amenities": ["Love's Travel Stop", "Chester's Chicken", "Godfather's Pizza", "DEF", "Dog Park"]
         },
         {
           "name": "Midday Run",
           "departs": "10:28 AM",
           "arrives": "01:51 PM",
-          "route_details": "6035 E Minerva Ln, Kingman, AZ 86401 \u2192 491 Armory Rd, Barstow, CA 92311 (215 miles, approx. 3 hrs 23 mins)",
-          "operational_notes": "Sustained open desert transit segment. Ensure communication channels remain open. Plan a 30-minute break at Valero / 7-Eleven.",
+          "route_details": "6035 E Minerva Ln, Kingman, AZ 86401 → 491 Armory Rd, Barstow, CA 92311 (215 miles, approx. 3 hrs 23 mins)",
+          "operational_notes": "Sustained open Mojave desert transit. Enter California on I-40 W. Plan a 30-minute break at Valero / 7-Eleven.",
           "start_name": "Love's Travel Stop (#272)",
           "start_address": "6035 E Minerva Lane, Kingman, AZ 86401",
           "start_coords": { "lat": 35.2341, "lon": -113.9213 },
           "destination_name": "Valero Gas / 7-Eleven",
           "destination_type": "gas_station",
           "destination_address": "491 Armory Road, Barstow, CA 92311",
-          "destination_coords": { "lat": 34.8872, "lon": -117.0094 }
+          "destination_coords": { "lat": 34.8872, "lon": -117.0094 },
+          "fuel_stint_miles": 215,
+          "timezone_change": "Enter CA / PDT (Same as AZ in Summer)",
+          "amenities": ["Valero Gas", "7-Eleven Convenience", "Hot Taquitos", "Cold Drinks"]
         },
         {
           "name": "Evening Stretch",
           "departs": "02:21 PM",
           "arrives": "03:49 PM",
-          "route_details": "491 Armory Rd, Barstow, CA 92311 \u2192 422 W Tehachapi Blvd, Tehachapi, CA 93561 (90 miles, approx. 1 hr 28 mins)",
-          "operational_notes": "Short final leg transitioning cleanly off I-40 onto CA-58 W toward the Tehachapi mountain hotel (Fairfield Inn & Suites).",
+          "route_details": "491 Armory Rd, Barstow, CA 92311 → 422 W Tehachapi Blvd, Tehachapi, CA 93561 (90 miles, approx. 1 hr 28 mins)",
+          "operational_notes": "Short final leg transitioning cleanly off I-40 onto CA-58 W through Mojave up to the Tehachapi mountain pass hotel (Fairfield Inn & Suites).",
           "start_name": "Valero Gas / 7-Eleven",
           "start_address": "491 Armory Road, Barstow, CA 92311",
           "start_coords": { "lat": 34.8872, "lon": -117.0094 },
           "destination_name": "Fairfield Inn & Suites by Marriott Tehachapi",
           "destination_type": "hotel",
           "destination_address": "422 W Tehachapi Boulevard, Tehachapi, CA 93561",
-          "destination_coords": { "lat": 35.1322, "lon": -118.4526 }
+          "destination_coords": { "lat": 35.1322, "lon": -118.4526 },
+          "fuel_stint_miles": 90,
+          "amenities": ["Hotel Arrival", "Tehachapi Pass (3,960 ft)", "Convoy Parking"],
+          "pass_name": "Tehachapi Pass (CA-58 Summit: 3,960 ft)"
         }
       ]
     },
@@ -214,13 +265,18 @@
       "start_location": "Tehachapi, CA",
       "end_location": "Redding, CA",
       "hotel": "Comfort Suites Redding - Shasta Lake",
+      "hotel_info": {
+        "parking_note": "Extended pull-through bays on north side for trailers & convoy staging",
+        "breakfast": "Complimentary Full Hot Breakfast (6:00 AM – 9:00 AM)",
+        "amenities": ["Convoy Parking", "Free Hot Breakfast", "EV Charging", "Shasta Cascade Air"]
+      },
       "target": "Traverse the highly congested Sacramento metro region perfectly between rush hours.",
       "legs": [
         {
           "name": "Morning Stretch",
           "departs": "06:30 AM",
           "arrives": "09:48 AM",
-          "route_details": "422 W Tehachapi Blvd, Tehachapi, CA 93561 \u2192 12754 Highway 33, Santa Nella, CA 95322 (213 miles, approx. 3 hrs 18 mins)",
+          "route_details": "422 W Tehachapi Blvd, Tehachapi, CA 93561 → 12754 Highway 33, Santa Nella, CA 95322 (213 miles, approx. 3 hrs 18 mins)",
           "operational_notes": "Early departure is essential to align the 5-hour journey to Sacramento with the midday low-volume window. 30-minute fuel stop at Valero / Circle K (Exit 407).",
           "start_name": "Fairfield Inn & Suites Tehachapi",
           "start_address": "422 W Tehachapi Boulevard, Tehachapi, CA 93561",
@@ -228,13 +284,15 @@
           "destination_name": "Valero Gas & Circle K (Exit 407)",
           "destination_type": "gas_station",
           "destination_address": "12754 Highway 33, Santa Nella, CA 95322",
-          "destination_coords": { "lat": 37.1024, "lon": -121.0188 }
+          "destination_coords": { "lat": 37.1024, "lon": -121.0188 },
+          "fuel_stint_miles": 213,
+          "amenities": ["Valero / Circle K", "Polar Pop & Coffee", "Multiple Quick-Serve Restaurants", "DEF"]
         },
         {
           "name": "Midday Run",
           "departs": "10:18 AM",
           "arrives": "12:45 PM",
-          "route_details": "12754 Highway 33, Santa Nella, CA 95322 \u2192 690 Hillgate Rd, Arbuckle, CA 95912 (159 miles, approx. 2 hrs 27 mins)",
+          "route_details": "12754 Highway 33, Santa Nella, CA 95322 → 690 Hillgate Rd, Arbuckle, CA 95912 (159 miles, approx. 2 hrs 27 mins)",
           "operational_notes": "Passes directly through the center of Sacramento at approximately 12:15 PM, dodging complex multi-lane commuter congestion. 30-minute break at Sinclair / Rorro's Tacos (Exit 566).",
           "start_name": "Valero Gas & Circle K (Exit 407)",
           "start_address": "12754 Highway 33, Santa Nella, CA 95322",
@@ -242,13 +300,15 @@
           "destination_name": "Sinclair Gas Station (w/ Rorro's Tacos)",
           "destination_type": "gas_station",
           "destination_address": "690 Hillgate Road, Arbuckle, CA 95912",
-          "destination_coords": { "lat": 39.0188, "lon": -122.0575 }
+          "destination_coords": { "lat": 39.0188, "lon": -122.0575 },
+          "fuel_stint_miles": 159,
+          "amenities": ["Rorro's Fresh Mexican Food & Tacos", "Sinclair Dino Fuel", "Clean Restrooms"]
         },
         {
           "name": "Evening Stretch",
           "departs": "01:15 PM",
           "arrives": "03:01 PM",
-          "route_details": "690 Hillgate Rd, Arbuckle, CA 95912 \u2192 1195 Grand Ave, Redding, CA 96003 (116 miles, approx. 1 hr 46 mins)",
+          "route_details": "690 Hillgate Rd, Arbuckle, CA 95912 → 1195 Grand Ave, Redding, CA 96003 (116 miles, approx. 1 hr 46 mins)",
           "operational_notes": "Clear, low-density rural drive northward up the Sacramento Valley to the final hotel (Comfort Suites Redding).",
           "start_name": "Sinclair Gas Station",
           "start_address": "690 Hillgate Road, Arbuckle, CA 95912",
@@ -256,7 +316,9 @@
           "destination_name": "Comfort Suites Redding - Shasta Lake",
           "destination_type": "hotel",
           "destination_address": "1195 Grand Avenue, Redding, CA 96003",
-          "destination_coords": { "lat": 40.5865, "lon": -122.3917 }
+          "destination_coords": { "lat": 40.5865, "lon": -122.3917 },
+          "fuel_stint_miles": 116,
+          "amenities": ["Hotel Arrival", "Convoy Parking", "Views of Mt. Shasta"]
         }
       ]
     },
@@ -266,21 +328,29 @@
       "start_location": "Redding, CA",
       "end_location": "Canyonville, OR",
       "hotel": "Home",
+      "hotel_info": {
+        "parking_note": "Final home driveway staging",
+        "breakfast": "Home Sweet Home",
+        "amenities": ["Final Arrival", "Mission Complete", "Pacific Northwest Air"]
+      },
       "target": "Secure optimal visibility and warmer road conditions through mountain passes.",
       "legs": [
         {
           "name": "Final Leg",
           "departs": "09:00 AM",
           "arrives": "12:33 PM",
-          "route_details": "1195 Grand Ave, Redding, CA 96003 \u2192 561 Mill St, Canyonville, OR 97417 (215 miles, approx. 3 hrs 33 mins)",
-          "operational_notes": "No urban gridlock risks. Leaving at 09:00 AM maximizes daylight safety, thermal road traction, and line-of-sight visibility over the mountain grades back home.",
+          "route_details": "1195 Grand Ave, Redding, CA 96003 → 561 Mill St, Canyonville, OR 97417 (215 miles, approx. 3 hrs 33 mins)",
+          "operational_notes": "No urban gridlock risks. Leaving at 09:00 AM maximizes daylight safety, thermal road traction, and line-of-sight visibility over the Siskiyou Pass (4,310 ft) and mountain grades back home.",
           "start_name": "Comfort Suites Redding",
           "start_address": "1195 Grand Avenue, Redding, CA 96003",
           "start_coords": { "lat": 40.5865, "lon": -122.3917 },
           "destination_name": "Home (Final Destination)",
           "destination_type": "home",
           "destination_address": "561 Mill Street, Canyonville, OR 97417",
-          "destination_coords": { "lat": 42.9298, "lon": -123.2798 }
+          "destination_coords": { "lat": 42.9298, "lon": -123.2798 },
+          "fuel_stint_miles": 215,
+          "amenities": ["Home Destination", "Mission Complete!"],
+          "pass_name": "Siskiyou Summit (I-5 Border Pass: 4,310 ft)"
         }
       ]
     }

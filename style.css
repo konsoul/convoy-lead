@@ -538,14 +538,50 @@ h3 {
     color: #ffffff;
     display: flex;
     align-items: center;
-    gap: 10px;
-    width: fit-content;
+    gap: 12px;
+    width: 100%;
 }
 
-.day-weather-pill i {
+.day-weather-content {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+}
+
+.day-weather-primary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.day-weather-primary i {
     width: 20px;
     height: 20px;
     color: #ffd60a;
+}
+
+.weather-divider {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.day-solar-info {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.daylight-badge {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .card-divider {
@@ -569,6 +605,13 @@ h3 {
     line-height: 1.45;
 }
 
+.hotel-info-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+}
+
 .hotel-pill {
     background-color: rgba(10, 132, 255, 0.1);
     border: 1px solid rgba(10, 132, 255, 0.25);
@@ -581,13 +624,163 @@ h3 {
     font-weight: 600;
     font-size: 14px;
     width: fit-content;
-    margin-top: 4px;
 }
 
 .hotel-pill i {
     width: 16px;
     height: 16px;
     color: var(--primary);
+}
+
+.hotel-details-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.hotel-notes-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.4;
+}
+
+.hotel-notes-line i {
+    width: 14px;
+    height: 14px;
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+/* --- Collapsible Pre-Trip Morning Checklist --- */
+.day-checklist-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.checklist-toggle-btn {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    width: 100%;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.checklist-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+.checklist-toggle-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.checklist-toggle-left i {
+    width: 16px;
+    height: 16px;
+    color: var(--green);
+}
+
+.checklist-toggle-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.checklist-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.checklist-badge.checklist-badge-complete {
+    background: rgba(48, 209, 88, 0.15);
+    color: var(--green);
+    border-color: rgba(48, 209, 88, 0.35);
+}
+
+.checklist-chevron {
+    width: 16px;
+    height: 16px;
+    color: rgba(255, 255, 255, 0.5);
+    transition: transform var(--transition-normal);
+}
+
+.checklist-drawer {
+    max-height: 400px;
+    overflow: hidden;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    opacity: 1;
+}
+
+.checklist-drawer.collapsed {
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.checklist-items-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 4px 4px 8px 4px;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: background var(--transition-fast);
+}
+
+.checklist-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.checklist-item.checked {
+    opacity: 0.65;
+}
+
+.checklist-item.checked .checklist-text {
+    text-decoration: line-through;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.checklist-checkbox {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--green);
+    cursor: pointer;
+}
+
+.checklist-text {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 500;
 }
 
 /* --- Sinus Relief & Clean Air Escape Banner (Day Header) --- */
@@ -981,6 +1174,46 @@ h3 {
     gap: 6px;
 }
 
+.leg-header-action-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-share-stint {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-color);
+    color: rgba(255, 255, 255, 0.7);
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.btn-share-stint:hover {
+    background: rgba(10, 132, 255, 0.2);
+    border-color: var(--primary);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.btn-share-stint.btn-share-copied {
+    background: rgba(48, 209, 88, 0.25);
+    border-color: var(--green);
+    color: var(--green);
+}
+
+.btn-share-stint i {
+    width: 15px;
+    height: 15px;
+}
+
 .leg-time-window {
     background-color: rgba(10, 132, 255, 0.12);
     color: var(--primary);
@@ -1161,6 +1394,24 @@ h3 {
     word-break: break-word;
 }
 
+.waypoint-amenities-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 4px;
+}
+
+.amenity-badge {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 500;
+}
+
 .btn-edit-address {
     background: transparent;
     border: none;
@@ -1200,6 +1451,13 @@ h3 {
     line-height: 1.45;
     flex: 1;
     min-width: 200px;
+}
+
+.route-badges-wrap {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
 }
 
 .stats-pill {
@@ -1246,6 +1504,36 @@ h3 {
 
 .stats-pill.stats-pill-red i {
     color: var(--danger);
+}
+
+.stats-pill.stats-pill-tz {
+    background-color: rgba(174, 129, 255, 0.14);
+    border-color: rgba(174, 129, 255, 0.35);
+    color: #ae81ff;
+}
+
+.stats-pill.stats-pill-tz i {
+    color: #ae81ff;
+}
+
+.stats-pill.stats-pill-pass {
+    background-color: rgba(255, 214, 10, 0.12);
+    border-color: rgba(255, 214, 10, 0.35);
+    color: #ffd60a;
+}
+
+.stats-pill.stats-pill-pass i {
+    color: #ffd60a;
+}
+
+.stats-pill.stats-pill-fuel {
+    background-color: rgba(10, 132, 255, 0.12);
+    border-color: rgba(10, 132, 255, 0.3);
+    color: #66d9ef;
+}
+
+.stats-pill.stats-pill-fuel i {
+    color: #66d9ef;
 }
 
 .stats-pill i {
@@ -1619,6 +1907,149 @@ h3 {
 .pdf-modal-card {
     max-width: 800px;
     height: 85vh;
+}
+
+.convoy-hub-modal-card {
+    max-width: 620px;
+}
+
+.modal-title-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-title-with-icon i {
+    width: 20px;
+    height: 20px;
+    color: var(--primary);
+}
+
+.modal-title-with-icon h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+/* Convoy Hub Internal Sections */
+.hub-section-box {
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 14px;
+}
+
+.hub-section-box:last-child {
+    margin-bottom: 0;
+}
+
+.hub-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.hub-section-header i {
+    width: 16px;
+    height: 16px;
+    color: var(--accent);
+}
+
+.hub-section-header h4 {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #ffffff;
+}
+
+.hub-comms-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+@media (max-width: 600px) {
+    .hub-comms-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.hub-comm-card {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.hub-comm-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.hub-comm-value {
+    font-size: 15px;
+    font-weight: 800;
+    color: #66d9ef;
+    font-family: var(--font-mono);
+}
+
+.hub-comm-sub {
+    font-size: 11.5px;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.dot-links-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+@media (max-width: 600px) {
+    .dot-links-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.dot-link-btn {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 9px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 12.5px;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+}
+
+.dot-link-btn:hover {
+    background: rgba(10, 132, 255, 0.15);
+    border-color: rgba(10, 132, 255, 0.4);
+    color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.dot-link-btn i {
+    width: 13px;
+    height: 13px;
+    opacity: 0.6;
+}
+
+.hub-pwa-desc {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.5;
 }
 
 .modal-header {

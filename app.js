@@ -3,6 +3,17 @@
  * Technology: Vanilla ES6+ Javascript
  */
 
+// Register PWA Service Worker for 100% Offline Readiness
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+            console.log('[SW] Registered for offline support:', reg.scope);
+        }).catch(err => {
+            console.log('[SW] Registration note:', err);
+        });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- Application State ---
     let itineraryData = [];
@@ -11,6 +22,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // In-memory weather cache & geocoding cache
     const weatherCache = new Map();
     const geocodeCache = new Map();
+
+    // Default Pre-Trip Morning Checklist Items
+    const DEFAULT_CHECKLIST = [
+        "Cold tire pressures & lug torque verified",
+        "Engine oil, coolant & transmission fluid levels checked",
+        "Cargo & trailer hitch / safety chains secure",
+        "CB & GMRS radios tested (battery charged)",
+        "Staging complete: navigation loaded, cooler iced, drinks stocked"
+    ];
 
     // Address Edit Target Tracker
     let currentEditTarget = {
@@ -25,12 +45,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeDayTitle = document.getElementById('active-day-title');
     const activeDayTarget = document.getElementById('active-day-target');
     const activeDayHotel = document.getElementById('active-day-hotel');
+    const activeDayHotelDetails = document.getElementById('active-day-hotel-details');
     const activeDayOvernightContainer = document.getElementById('active-day-overnight-container');
     const legsContainer = document.getElementById('legs-container');
     
     const progressBarFill = document.getElementById('progress-bar-fill');
     const progressText = document.getElementById('progress-text');
     const tripDateInput = document.getElementById('trip-start-date');
+
+    // Checklist Elements
+    const toggleChecklistBtn = document.getElementById('toggle-checklist-btn');
+    const checklistDrawer = document.getElementById('checklist-drawer');
+    const checklistItemsContainer = document.getElementById('checklist-items');
+    const checklistProgressBadge = document.getElementById('checklist-progress-badge');
+    const checklistChevron = document.getElementById('checklist-chevron');
+
+    // Convoy Hub Modal elements
+    const convoyHubBtn = document.getElementById('convoy-hub-btn');
+    const convoyHubModal = document.getElementById('convoy-hub-modal');
+    const closeConvoyHubBtn = document.getElementById('close-convoy-hub-btn');
+    const closeConvoyHubFooterBtn = document.getElementById('close-convoy-hub-footer-btn');
 
     // PDF Modal elements
     const pdfModal = document.getElementById('pdf-modal');
@@ -134,16 +168,34 @@ document.addEventListener('DOMContentLoaded', () => {
         return min >= 35 ? (hour + 1) % 24 : hour;
     }
 
+    function formatTimeFromISO(isoStr) {
+        if (!isoStr) return '';
+        try {
+            const d = new Date(isoStr);
+            if (!isNaN(d.getTime())) {
+                return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+            }
+        } catch (e) {}
+
+        const parts = isoStr.split('T')[1]?.split(':');
+        if (parts && parts.length >= 2) {
+            let hour = parseInt(parts[0], 10);
+            const min = parts[1];
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            hour = hour % 12 || 12;
+            return `${hour}:${min} ${ampm}`;
+        }
+        return '';
+    }
+
     function getShortLocationName(address) {
         if (!address) return '';
         const parts = address.split(',').map(s => s.trim());
         if (parts.length >= 3) {
-            // e.g. "1855 US Highway 72 E", "Huntsville", "AL 35811" -> "Huntsville, AL"
             const city = parts[parts.length - 2];
             const stateZip = parts[parts.length - 1].split(' ')[0];
             return `${city}, ${stateZip}`;
         } else if (parts.length === 2) {
-            // e.g. "Canton, GA" -> "Canton, GA"
             return address;
         }
         return parts[0];
@@ -204,10 +256,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (hoursMatch) totalMinutes += parseInt(hoursMatch[1], 10) * 60;
         if (minsMatch) totalMinutes += parseInt(minsMatch[1], 10);
         
-        // Revised Duration criteria:
-        // Pushing past 3.5 hrs (> 210 mins): Red
-        // 2.5 to 3.5 hrs (> 150 mins and <= 210 mins): Orange
-        // 2.5 hrs or less (<= 150 mins): Green
         if (totalMinutes > 210) {
             return 'stats-pill-red';
         } else if (totalMinutes > 150) {
@@ -215,6 +263,58 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             return 'stats-pill-green';
         }
+    }
+
+    // --- Pre-Trip Morning Checklist Management ---
+
+    function getChecklistState(dayNumber) {
+        try {
+            const raw = localStorage.getItem(`convoy_checklist_day_${dayNumber}`);
+            if (raw) return JSON.parse(raw);
+        } catch (e) {}
+        return DEFAULT_CHECKLIST.map(() => false);
+    }
+
+    function saveChecklistState(dayNumber, state) {
+        try {
+            localStorage.setItem(`convoy_checklist_day_${dayNumber}`, JSON.stringify(state));
+        } catch (e) {}
+    }
+
+    function renderChecklist(dayNumber) {
+        if (!checklistItemsContainer || !checklistProgressBadge) return;
+        
+        const state = getChecklistState(dayNumber);
+        const completedCount = state.filter(Boolean).length;
+        const totalCount = DEFAULT_CHECKLIST.length;
+
+        checklistProgressBadge.textContent = `${completedCount}/${totalCount} Done`;
+        if (completedCount === totalCount) {
+            checklistProgressBadge.className = 'checklist-badge checklist-badge-complete';
+            checklistProgressBadge.textContent = `All ${totalCount} Checked ✓`;
+        } else {
+            checklistProgressBadge.className = 'checklist-badge';
+        }
+
+        checklistItemsContainer.innerHTML = '';
+        DEFAULT_CHECKLIST.forEach((text, idx) => {
+            const isChecked = !!state[idx];
+            const itemRow = document.createElement('label');
+            itemRow.className = `checklist-item ${isChecked ? 'checked' : ''}`;
+            itemRow.innerHTML = `
+                <input type="checkbox" class="checklist-checkbox" data-index="${idx}" ${isChecked ? 'checked' : ''}>
+                <span class="checklist-text">${text}</span>
+            `;
+
+            const checkbox = itemRow.querySelector('input');
+            checkbox.addEventListener('change', () => {
+                state[idx] = checkbox.checked;
+                saveChecklistState(dayNumber, state);
+                renderChecklist(dayNumber);
+            });
+
+            checklistItemsContainer.appendChild(itemRow);
+        });
     }
 
     // --- Air Quality & Sinus Relief Tracker ---
@@ -248,154 +348,151 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let aqiVal = null;
         if (aqiHourly && aqiHourly.us_aqi && aqiHourly.us_aqi.length > 0) {
-            const validValues = aqiHourly.us_aqi.slice(0, 12).filter(v => typeof v === 'number' && !isNaN(v));
-            if (validValues.length > 0) {
-                aqiVal = Math.round(validValues.reduce((a, b) => a + b, 0) / validValues.length);
+            const valid = aqiHourly.us_aqi.filter(v => v !== null && !isNaN(v));
+            if (valid.length > 0) {
+                aqiVal = Math.round(valid.slice(0, 12).reduce((a, b) => a + b, 0) / Math.min(12, valid.length));
             }
         }
-        
-        // Geographic calibrated fallback if AQI forecast unavailable
-        if (aqiVal === null || isNaN(aqiVal)) {
-            if (lon > -90) aqiVal = 88; // Deep South / Canton humidity belt
-            else if (lon > -100) aqiVal = 54; // Plains
-            else if (lon > -114) aqiVal = 22; // NM / Flagstaff 7,000 ft plateau
-            else if (lon > -118.5) aqiVal = 30; // Mojave
-            else if (lon > -122 && lat < 40) aqiVal = 58; // Central Valley
-            else aqiVal = 16; // Pacific Northwest Siskiyou pines
-        }
-        
-        let badgeClass = 'aqi-pristine';
-        let statusText = 'Pristine Clean Air';
-        let sinusHeadline = '100% Sinus Relief';
-        let icon = 'sparkles';
-        let sinusBlurb = '';
-        
-        if (aqiVal <= 35) {
-            badgeClass = 'aqi-pristine';
-            statusText = 'Pristine Clean Air';
-            icon = 'sparkles';
-            
-            if (lon <= -100 && lon >= -115) {
-                sinusHeadline = '✨ 100% Sinus Relief • Zero Ragweed';
-                sinusBlurb = 'High-altitude mountain air (5,000–7,000 ft). Completely free from ragweed pollen, zero industrial ozone, and crisp mountain oxygen. Total sinus bliss!';
-            } else if (lon <= -122) {
-                sinusHeadline = '💎 100% Sinus Relief • Oregon Pine Air';
-                sinusBlurb = 'Pacific Northwest mountain pine air. Zero smog, ultra-low particulates, and refreshing crisp atmosphere. Total respiratory freedom!';
-            } else {
-                sinusHeadline = '✨ 100% Sinus Relief';
-                sinusBlurb = 'Pristine atmosphere with virtually zero allergens and negligible ground ozone.';
-            }
-        } else if (aqiVal <= 50) {
-            badgeClass = 'aqi-good';
-            statusText = 'Clean Air';
-            icon = 'leaf';
-            sinusHeadline = '🌿 85% Sinus Relief';
-            sinusBlurb = 'Clean desert/plains air. Rapid drop in ragweed and summer humidity. Significant relief from sinus pressure and throat irritation.';
-        } else if (aqiVal <= 100) {
-            badgeClass = 'aqi-moderate';
-            statusText = 'Moderate Air';
+
+        let stage = 'warning';
+        let statusText = 'Humid / High Mold & Pollen';
+        let sinusScore = 40;
+        let icon = 'alert-circle';
+        let detail = 'High relative humidity and dense airborne allergens. Keep AC on recirculate.';
+
+        if (dayNumber === 1) {
+            stage = 'warning';
+            sinusScore = 42;
+            statusText = 'High Humidity & Forest Mold';
+            icon = 'droplet';
+            detail = 'Southeast summer moisture. Keep cabin air filtration on recirculate.';
+        } else if (dayNumber === 2) {
+            stage = 'transition';
+            sinusScore = 65;
+            statusText = 'Decreasing Humidity & Drying Air';
             icon = 'wind';
-            sinusHeadline = '🌤️ 50% Sinus Relief';
-            sinusBlurb = 'Moderate air quality with lingering agricultural dust or valley haze. Ragweed lower than Southeast, but mild nasal sensitivity possible.';
-        } else {
-            badgeClass = 'aqi-warning';
-            statusText = 'Code Orange Smog / Ragweed';
-            icon = 'alert-triangle';
-            sinusHeadline = '⚠️ Active Sinus Alert (15% Relief)';
-            sinusBlurb = 'Elevated ground-level ozone and peak humid Southeast ragweed pollen. Keep vehicle recirculation active and stay hydrated until heading west.';
+            detail = 'Entering the dry Plains corridor. Relative humidity drops sharply past OKC into NM.';
+        } else if (dayNumber === 3) {
+            stage = 'breakthrough';
+            sinusScore = 88;
+            statusText = 'Alpine Arid & High Desert Pine';
+            icon = 'sparkles';
+            detail = 'High plateau (6,900 ft). Crisp, low humidity and high pollen dispersion.';
+        } else if (dayNumber === 4) {
+            stage = 'breakthrough';
+            sinusScore = 85;
+            statusText = 'Dry Mojave Air & High Pass Clarity';
+            icon = 'sparkles';
+            detail = 'Very dry desert atmosphere. Minimal allergen triggers; keep hydrated.';
+        } else if (dayNumber === 5) {
+            stage = 'transition';
+            sinusScore = 78;
+            statusText = 'Sacramento Valley Agricultural Transit';
+            icon = 'wind';
+            detail = 'Warm Central Valley air; clears rapidly into Shasta Cascade pines.';
+        } else if (dayNumber === 6) {
+            stage = 'pristine';
+            sinusScore = 98;
+            statusText = 'Pristine Pacific Northwest Mountain Air';
+            icon = 'sparkles';
+            detail = 'Mountain pine air, cool ambient temps, and lowest particulate index.';
         }
-        
-        return {
-            aqi: aqiVal,
-            badgeClass,
-            statusText,
-            sinusHeadline,
-            icon,
-            sinusBlurb
-        };
+
+        if (aqiVal !== null) {
+            if (aqiVal <= 30) {
+                statusText += ` (AQI ${aqiVal} • Clean)`;
+            } else if (aqiVal <= 50) {
+                statusText += ` (AQI ${aqiVal} • Good)`;
+            } else {
+                statusText += ` (AQI ${aqiVal} • Moderate)`;
+            }
+        }
+
+        return { stage, statusText, sinusScore, icon, detail, aqiVal };
     }
 
     function renderSinusReliefBanner(dayNumber) {
-        const bannerEl = document.getElementById('day-sinus-relief-banner');
-        if (!bannerEl) return;
-        
-        let stageClass = 'stage-warning';
-        let icon = 'alert-triangle';
-        let title = 'Code Orange Air & Ragweed Belt';
-        let pillText = '15% Relief';
-        let desc = 'Currently within the humid Southeast corridor with active ground-level summer ozone and late-season ragweed. Major relief starts once clearing the Mississippi basin toward the high plains!';
-        let progressPct = 20;
-        let progressLabel = 'Day 1 of 6 • Escaping Southeast Smog';
-        
-        if (dayNumber === 1) {
-            stageClass = 'stage-warning';
-            icon = 'alert-triangle';
-            title = 'Canton & Deep South Ragweed/Ozone Belt';
-            pillText = '15% Relief';
-            desc = 'Active Georgia/Tennessee summer humidity with elevated ozone & ragweed. Keep cabin air on recirculation. Drier air begins past Little Rock!';
-            progressPct = 20;
-            progressLabel = 'Escape in Progress • 20% to Alpine Relief';
-        } else if (dayNumber === 2) {
-            stageClass = 'stage-transition';
-            icon = 'wind';
-            title = 'Plains Transition — Climbing to 4,000 ft Elevation';
-            pillText = '65% Relief';
-            desc = 'Crossing Arkansas and Oklahoma into the Texas Panhandle. Humidity is dropping sharply, ragweed levels are falling, and breathing is getting much easier!';
-            progressPct = 55;
-            progressLabel = 'Gateway to Clean Air • 55% to Alpine Relief';
-        } else if (dayNumber === 3) {
-            stageClass = 'stage-breakthrough';
-            icon = 'sparkles';
-            title = '🎉 MAJOR BREAKTHROUGH: 7,000 FT ALPINE PURE AIR!';
-            pillText = '✨ 100% Sinus Relief';
-            desc = 'Welcome to the New Mexico & Arizona High Plateau (Flagstaff @ 7,000 ft)! 100% free from ragweed pollen, near-zero ground ozone, and crisp mountain oxygen. Total sinus bliss!';
-            progressPct = 100;
-            progressLabel = 'Mountain Air Zone Reached • 100% Pristine';
-        } else if (dayNumber === 4) {
-            stageClass = 'stage-pristine';
-            icon = 'sparkles';
-            title = 'High Desert & Tehachapi Pass Clear Skies';
-            pillText = '✨ 95% Sinus Relief';
-            desc = 'Cruising open Mojave skies into Tehachapi mountain pass. Bone-dry air, zero humidity, and virtually zero allergens or pollen.';
-            progressPct = 95;
-            progressLabel = 'Desert Mountain Corridor • 95% Pristine';
-        } else if (dayNumber === 5) {
-            stageClass = 'stage-transition';
-            icon = 'trees';
-            title = 'Sacramento Bypass into Shasta Pine Country';
-            pillText = '85% Sinus Relief';
-            desc = 'Clearing Central Valley midday haze quickly and ascending into the majestic Shasta-Cascade evergreen pine foothills in Redding. Fresh mountain breezes!';
-            progressPct = 85;
-            progressLabel = 'Ascending to Oregon • 85% Pristine';
-        } else if (dayNumber === 6) {
-            stageClass = 'stage-pristine';
-            icon = 'sparkles';
-            title = '🌲 PACIFIC NORTHWEST EVERGREEN SANCTUARY!';
-            pillText = '💎 100% Pure Mountain Air';
-            desc = 'Climbing over the 4,310 ft Siskiyou Mountain Pass into Oregon! Pristine evergreen pine air, zero smog, zero ragweed, and pure Pacific Northwest oxygen back home in Canyonville!';
-            progressPct = 100;
-            progressLabel = 'Home Sanctuary • 100% Pure Mountain Air';
-        }
-        
-        bannerEl.innerHTML = `
-            <div class="sinus-relief-banner ${stageClass}">
+        const bannerContainer = document.getElementById('day-sinus-relief-banner');
+        if (!bannerContainer) return;
+
+        const milestones = {
+            1: {
+                title: "Allergy Milestone: High Humidity & Mold Zone",
+                stage: "stage-warning",
+                badge: "40% Relief",
+                badgeClass: "badge-orange",
+                icon: "droplet",
+                desc: "Traversing the Southeast corridor. Humid air, high pollen, and active mold spores.",
+                progress: 40
+            },
+            2: {
+                title: "Allergy Milestone: Transition to Dry Western Air",
+                stage: "stage-transition",
+                badge: "65% Relief",
+                badgeClass: "badge-accent",
+                icon: "wind",
+                desc: "Crossing the 100th Meridian. Humidity plummets from 80% to 25%, offering notable relief.",
+                progress: 65
+            },
+            3: {
+                title: "Allergy Milestone: Colorado Plateau & Pine Air",
+                stage: "stage-breakthrough",
+                badge: "88% Clean Air",
+                badgeClass: "badge-green",
+                icon: "sparkles",
+                desc: "High elevation (6,900 ft) with crisp mountain air and near-zero mold levels.",
+                progress: 88
+            },
+            4: {
+                title: "Allergy Milestone: Mojave Desert & Tehachapi Pass",
+                stage: "stage-breakthrough",
+                badge: "85% Clean Air",
+                badgeClass: "badge-green",
+                icon: "sparkles",
+                desc: "Ultra-low ambient humidity and clear mountain pass airflow.",
+                progress: 85
+            },
+            5: {
+                title: "Allergy Milestone: Shasta Cascade Gateway",
+                stage: "stage-transition",
+                badge: "80% Clean Air",
+                badgeClass: "badge-green",
+                icon: "wind",
+                desc: "Valley transit climbing directly into Shasta pine foothills.",
+                progress: 80
+            },
+            6: {
+                title: "Allergy Milestone: Pacific Northwest Mountain Air",
+                stage: "stage-pristine",
+                badge: "98% Clean Air",
+                badgeClass: "badge-green",
+                icon: "sparkles",
+                desc: "Pristine Pacific Northwest mountain evergreen air. Full allergy relief achieved.",
+                progress: 98
+            }
+        };
+
+        const milestone = milestones[dayNumber] || milestones[1];
+
+        bannerContainer.innerHTML = `
+            <div class="sinus-relief-banner ${milestone.stage}">
                 <div class="sinus-banner-header">
                     <div class="sinus-banner-title-group">
                         <div class="sinus-banner-icon-badge">
-                            <i data-lucide="${icon}"></i>
+                            <i data-lucide="${milestone.icon}"></i>
                         </div>
-                        <span class="sinus-banner-title">${title}</span>
+                        <span class="sinus-banner-title">${milestone.title}</span>
                     </div>
-                    <span class="sinus-meter-pill">${pillText}</span>
+                    <span class="sinus-meter-pill">${milestone.badge}</span>
                 </div>
-                <p class="sinus-banner-desc">${desc}</p>
+                <p class="sinus-banner-desc">${milestone.desc}</p>
                 <div class="sinus-progress-container">
                     <div class="sinus-progress-labels">
-                        <span>Clean Air & Sinus Progress</span>
-                        <span>${progressLabel}</span>
+                        <span>Caravan Clean-Air Progress</span>
+                        <span>${milestone.progress}%</span>
                     </div>
                     <div class="sinus-progress-bar-bg">
-                        <div class="sinus-progress-bar-fill" style="width: ${progressPct}%"></div>
+                        <div class="sinus-progress-bar-fill" style="width: ${milestone.progress}%"></div>
                     </div>
                 </div>
             </div>
@@ -403,151 +500,32 @@ document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
     }
 
-    // --- Weather Mapping & Blurb Generator ---
-
+    // --- Weather Mapping Helpers ---
     function getWeatherInfo(code) {
-        switch (code) {
-            case 0:
-                return { text: 'Clear Sky', icon: 'sun' };
-            case 1:
-                return { text: 'Mainly Clear', icon: 'sun' };
-            case 2:
-                return { text: 'Partly Cloudy', icon: 'cloud-sun' };
-            case 3:
-                return { text: 'Overcast', icon: 'cloud' };
-            case 45:
-            case 48:
-                return { text: 'Foggy', icon: 'cloud-fog' };
-            case 51:
-            case 53:
-            case 55:
-                return { text: 'Drizzle', icon: 'cloud-drizzle' };
-            case 56:
-            case 57:
-                return { text: 'Freezing Drizzle', icon: 'cloud-snow' };
-            case 61:
-                return { text: 'Light Rain', icon: 'cloud-rain' };
-            case 63:
-                return { text: 'Moderate Rain', icon: 'cloud-rain' };
-            case 65:
-                return { text: 'Heavy Rain', icon: 'cloud-rain' };
-            case 66:
-            case 67:
-                return { text: 'Freezing Rain', icon: 'cloud-rain' };
-            case 71:
-            case 73:
-            case 75:
-            case 77:
-                return { text: 'Snow', icon: 'snowflake' };
-            case 80:
-            case 81:
-            case 82:
-                return { text: 'Rain Showers', icon: 'cloud-rain' };
-            case 85:
-            case 86:
-                return { text: 'Snow Showers', icon: 'snowflake' };
-            case 95:
-                return { text: 'Thunderstorm', icon: 'cloud-lightning' };
-            case 96:
-            case 99:
-                return { text: 'Thunderstorm w/ Hail', icon: 'cloud-lightning' };
-            default:
-                return { text: 'Clear', icon: 'sun' };
-        }
+        if (code === 0) return { icon: 'sun', text: 'Clear Skies' };
+        if (code === 1) return { icon: 'sun-medium', text: 'Mainly Clear' };
+        if (code === 2) return { icon: 'cloud-sun', text: 'Partly Cloudy' };
+        if (code === 3) return { icon: 'cloud', text: 'Overcast' };
+        if (code >= 45 && code <= 48) return { icon: 'cloud-fog', text: 'Fog / Low Vis' };
+        if (code >= 51 && code <= 55) return { icon: 'cloud-drizzle', text: 'Drizzle' };
+        if (code >= 61 && code <= 65) return { icon: 'cloud-rain', text: 'Rain Showers' };
+        if (code >= 71 && code <= 77) return { icon: 'cloud-snow', text: 'Snow / Flurries' };
+        if (code >= 80 && code <= 82) return { icon: 'cloud-rain', text: 'Heavy Showers' };
+        if (code >= 95) return { icon: 'cloud-lightning', text: 'Thunderstorms' };
+        return { icon: 'sun', text: 'Clear' };
     }
 
-    function generateConditionBlurb(stats, leg, startCoords, destCoords, startLoc, destLoc) {
-        const { minTemp, maxTemp, avgTemp, maxPrecip, maxWind, dominantCode, depTemp, arrTemp, depCode, arrCode } = stats;
-        const weather = getWeatherInfo(dominantCode);
-        const depWeather = getWeatherInfo(depCode);
-        const arrWeather = getWeatherInfo(arrCode);
+    // --- Weather Fetching & Caching ---
 
-        // Check mountain pass conditions (Flagstaff / Siskiyous / Tehachapi)
-        const isMountainPass = (startCoords && (startCoords.lat >= 35 && startCoords.lon <= -111)) ||
-                              (destCoords && (destCoords.lat >= 35 && destCoords.lon <= -111));
+    async function getCoordinates(address, fallbackAddress, defaultCoords) {
+        const query = address || fallbackAddress;
+        if (!query) return defaultCoords || { lat: 35.0, lon: -95.0 };
 
-        // 1. Severe / Thunderstorms
-        if (dominantCode >= 95) {
-            return `Thunderstorm activity expected along the ${startLoc} \u2192 ${destLoc} transit corridor (precip probability up to ${maxPrecip}% and gusts near ${maxWind} mph). Increase caravan following distance, reduce cruising speed, and monitor radar check-ins.`;
-        }
-
-        // 2. Snow / Freezing / Winter Conditions
-        if ((dominantCode >= 71 && dominantCode <= 86) || (dominantCode >= 56 && dominantCode <= 57) || minTemp <= 32) {
-            const passNote = isMountainPass ? 'pass traction advisories' : 'traction conditions';
-            return `Freezing road conditions possible between ${startLoc} and ${destLoc} with temperatures down to ${minTemp}°F. Check mountain ${passNote}, maintain steady headway, and watch for black ice on elevated overpasses.`;
-        }
-
-        // 3. Rain / Showers
-        if (dominantCode >= 61 || dominantCode === 80 || dominantCode === 81 || dominantCode === 82 || maxPrecip >= 40) {
-            return `Wet pavement anticipated during transit with ${weather.text.toLowerCase()} (${maxPrecip}% chance) and temperatures shifting from ${depTemp}°F at ${startLoc} to ${arrTemp}°F at ${destLoc}. Ensure wipers and low-beams are active with extra stopping distance.`;
-        }
-
-        // 4. Fog / Low Visibility
-        if (dominantCode === 45 || dominantCode === 48) {
-            return `Morning fog and reduced visibility expected along this stretch (${startLoc} to ${destLoc}). Temps hovering around ${avgTemp}°F with gentle winds (${maxWind} mph). Use low-beam lighting and announce waypoint maneuvers over radio.`;
-        }
-
-        // 5. High Heat (Geographically Context-Aware)
-        if (maxTemp >= 90) {
-            const windNote = maxWind >= 15 ? ` along with ${maxWind} mph crosswinds` : '';
-            
-            // Determine geographic heat context
-            let heatType = 'High afternoon heat';
-            const avgLon = destCoords ? (startCoords ? (startCoords.lon + destCoords.lon) / 2 : destCoords.lon) : -95;
-            const avgLat = destCoords ? (startCoords ? (startCoords.lat + destCoords.lat) / 2 : destCoords.lat) : 35;
-
-            if (avgLon > -95) {
-                heatType = 'Hot and humid summer conditions';
-            } else if (avgLon <= -95 && avgLon >= -118.5 && avgLat <= 36.5) {
-                heatType = 'High desert heat';
-            } else if (avgLat >= 36.5 && avgLon <= -119) {
-                heatType = 'Warm Central Valley heat';
-            }
-
-            return `${heatType} reaching ${maxTemp}°F${windNote} between ${startLoc} (${depTemp}°F) and ${destLoc} (${arrTemp}°F). Keep vehicle engine temperatures and tire pressures monitored, ensure AC systems are functioning, and keep caravan hydration ready.`;
-        }
-
-        // 6. High Wind / Mountain Crosswinds
-        if (maxWind >= 18) {
-            return `Breezy open corridor from ${startLoc} to ${destLoc} with steady crosswinds reaching ${maxWind} mph. Temperatures shifting from ${depTemp}°F to ${arrTemp}°F. High-profile vehicles and campers should maintain firm two-handed steering.`;
-        }
-
-        // 7. Transitioning Skies (e.g. Clear to Overcast or Partly Cloudy)
-        if (depCode !== arrCode && (depCode <= 3 && arrCode <= 3)) {
-            return `Departing under ${depWeather.text.toLowerCase()} skies in ${startLoc} (${depTemp}°F) transitioning to ${arrWeather.text.toLowerCase()} upon arrival in ${destLoc} (${arrTemp}°F). Calm cruising winds (${maxWind} mph) with dry pavement across this stretch.`;
-        }
-
-        // 8. Overcast / Cool
-        if (dominantCode === 3) {
-            return `Overcast skies with mild cruising temperatures between ${minTemp}°F and ${maxTemp}°F (${depTemp}°F at departure \u2192 ${arrTemp}°F upon arrival). Wind speeds at a calm ${maxWind} mph with dry pavement for standard highway pace.`;
-        }
-
-        // 9. Partly Cloudy / Fair
-        if (dominantCode === 1 || dominantCode === 2) {
-            return `Partly cloudy with pleasant cruising conditions from ${depTemp}°F at ${startLoc} to ${arrTemp}°F at ${destLoc}. Wind speeds around ${maxWind} mph. Favorable driving conditions across this leg.`;
-        }
-
-        // 10. Clear / Sunny
-        return `Clear skies and high line-of-sight visibility from ${startLoc} (${depTemp}°F) to ${destLoc} (${arrTemp}°F). Light winds (${maxWind} mph)—ideal convoy cruising weather.`;
-    }
-
-    // --- Geocoding & Open-Meteo API Fetchers ---
-
-    async function getCoordinates(address, originalAddress, defaultCoords) {
-        if (!address) return defaultCoords || { lat: 35.0, lon: -95.0 };
-        const trimmed = address.trim();
-
-        // If address matches original unedited address, use pre-calculated defaultCoords
-        if (originalAddress && trimmed.toLowerCase() === originalAddress.trim().toLowerCase() && defaultCoords && defaultCoords.lat && defaultCoords.lon) {
-            return defaultCoords;
-        }
-
-        if (geocodeCache.has(trimmed)) {
-            return geocodeCache.get(trimmed);
-        }
+        const cached = geocodeCache.get(query);
+        if (cached) return cached;
 
         try {
-            const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(trimmed)}&count=1&language=en&format=json`;
+            const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=en&format=json`;
             const res = await fetch(url);
             if (res.ok) {
                 const data = await res.json();
@@ -556,7 +534,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         lat: data.results[0].latitude,
                         lon: data.results[0].longitude
                     };
-                    geocodeCache.set(trimmed, coords);
+                    geocodeCache.set(query, coords);
                     return coords;
                 }
             }
@@ -577,7 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return cached.data;
         }
 
-        const url = `https://api.open-meteo.com/v1/gfs?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m,apparent_temperature&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto&forecast_days=16`;
+        const url = `https://api.open-meteo.com/v1/gfs?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m,apparent_temperature&daily=sunrise,sunset&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto&forecast_days=16`;
         const res = await fetch(url);
         if (!res.ok) {
             throw new Error(`Open-Meteo HTTP error ${res.status}`);
@@ -585,18 +563,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await res.json();
         
         weatherCache.set(cacheKey, {
-            data: data.hourly,
+            data: { hourly: data.hourly, daily: data.daily },
             timestamp: now
         });
 
-        return data.hourly;
+        return { hourly: data.hourly, daily: data.daily };
     }
 
     function extractTransitStats(hourly, dateStr, startHour, endHour) {
         if (!hourly || !hourly.time || hourly.time.length === 0) return null;
 
         let isLiveForecast = true;
-        // Find indices for the specific date
         let indices = [];
         for (let i = 0; i < hourly.time.length; i++) {
             const timeEntry = hourly.time[i];
@@ -608,7 +585,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // If target date is out of range or not found, fallback to the first available day's hours
         if (indices.length === 0) {
             isLiveForecast = false;
             for (let i = 0; i < Math.min(24, hourly.time.length); i++) {
@@ -619,7 +595,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Fallback to first element if still empty
         if (indices.length === 0) {
             indices = [0];
         }
@@ -632,7 +607,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const depCode = codes[0];
         const arrCode = codes[codes.length - 1];
 
-        // Find dominant code (prioritize severe/rain/fog codes over clear)
         let dominantCode = codes[0];
         let hasHazard = false;
         for (const code of codes) {
@@ -642,31 +616,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (code >= 45 && dominantCode < 45) { dominantCode = code; hasHazard = true; }
         }
 
-        // If no hazard (thunderstorm/snow/rain/fog), use the median sky condition
         if (!hasHazard) {
             const sortedCodes = [...codes].sort((a, b) => a - b);
             dominantCode = sortedCodes[Math.floor(sortedCodes.length / 2)];
         }
 
-        const minTemp = Math.min(...temps);
-        const maxTemp = Math.max(...temps);
-        const avgTemp = Math.round(temps.reduce((a, b) => a + b, 0) / temps.length);
-        const maxPrecip = Math.max(...precips);
-        const maxWind = Math.max(...winds);
-        const depTemp = temps[0];
-        const arrTemp = temps[temps.length - 1];
-
         return {
-            minTemp,
-            maxTemp,
-            avgTemp,
-            maxPrecip,
-            maxWind,
+            depTemp: temps[0],
+            arrTemp: temps[temps.length - 1],
+            minTemp: Math.min(...temps),
+            maxTemp: Math.max(...temps),
+            avgTemp: Math.round(temps.reduce((a, b) => a + b, 0) / temps.length),
+            maxPrecip: Math.max(...precips),
+            maxWind: Math.max(...winds),
             dominantCode,
             depCode,
             arrCode,
-            depTemp,
-            arrTemp,
             allTemps: temps,
             allCodes: codes,
             isLiveForecast
@@ -676,13 +641,15 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadWeatherForActiveDay(day) {
         const targetDate = getDateForDay(day.day_number);
 
-        // Update Daily Full 24-Hour Weather Summary in the Day Header Card
+        // Update Daily Weather Summary & Solar Times in Day Header Card
         try {
             if (day.legs && day.legs.length > 0) {
                 const firstLeg = day.legs[0];
                 const firstStart = getCustomAddress(getLegId(firstLeg), 'start') || firstLeg.start_address || '';
                 const originCoords = await getCoordinates(firstStart, firstLeg.start_address, firstLeg.start_coords);
-                const dayHourly = await fetchHourlyForecast(originCoords.lat, originCoords.lon);
+                const weatherObj = await fetchHourlyForecast(originCoords.lat, originCoords.lon);
+                const dayHourly = weatherObj.hourly;
+                const dayDaily = weatherObj.daily;
                 
                 let day24hTemps = [];
                 let day24hCodes = [];
@@ -696,16 +663,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (day24hTemps.length > 0) {
                     const dailyLow = Math.min(...day24hTemps);
                     const dailyHigh = Math.max(...day24hTemps);
-                    // Afternoon peak condition
                     const peakCode = day24hCodes[Math.min(14, day24hCodes.length - 1)] || day24hCodes[0];
                     const dayMeta = getWeatherInfo(peakCode);
+
+                    // Parse Sunrise & Sunset
+                    let sunriseStr = '';
+                    let sunsetStr = '';
+                    let daylightStr = '';
+
+                    if (dayDaily && dayDaily.time) {
+                        const dateIdx = dayDaily.time.findIndex(t => t === targetDate);
+                        const idx = dateIdx !== -1 ? dateIdx : 0;
+                        const riseISO = dayDaily.sunrise ? dayDaily.sunrise[idx] : null;
+                        const setISO = dayDaily.sunset ? dayDaily.sunset[idx] : null;
+
+                        sunriseStr = formatTimeFromISO(riseISO);
+                        sunsetStr = formatTimeFromISO(setISO);
+
+                        if (riseISO && setISO) {
+                            const riseMs = new Date(riseISO).getTime();
+                            const setMs = new Date(setISO).getTime();
+                            if (!isNaN(riseMs) && !isNaN(setMs) && setMs > riseMs) {
+                                const diffMins = Math.round((setMs - riseMs) / 60000);
+                                const hrs = Math.floor(diffMins / 60);
+                                const mins = diffMins % 60;
+                                daylightStr = `${hrs}h ${mins}m daylight`;
+                            }
+                        }
+                    }
 
                     const dayPill = document.getElementById('day-weather-summary-pill');
                     if (dayPill) {
                         dayPill.style.display = 'flex';
                         dayPill.innerHTML = `
-                            <i data-lucide="${dayMeta.icon}"></i>
-                            <span>Daily: High ${dailyHigh}°F • Low ${dailyLow}°F (${dayMeta.text})</span>
+                            <div class="day-weather-content">
+                                <div class="day-weather-primary">
+                                    <i data-lucide="${dayMeta.icon}"></i>
+                                    <span>High ${dailyHigh}°F • Low ${dailyLow}°F (${dayMeta.text})</span>
+                                </div>
+                                ${sunriseStr && sunsetStr ? `
+                                <span class="weather-divider">•</span>
+                                <div class="day-solar-info">
+                                    <span>🌅 ${sunriseStr}</span>
+                                    <span>🌇 Sunset ${sunsetStr}</span>
+                                    ${daylightStr ? `<span class="daylight-badge">${daylightStr}</span>` : ''}
+                                </div>
+                                ` : ''}
+                            </div>
                         `;
                         lucide.createIcons();
                     }
@@ -733,18 +737,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const destLocationName = getShortLocationName(destAddress);
 
             try {
-                // Resolve coordinates for BOTH Start and Destination points
                 const [startCoords, destCoords] = await Promise.all([
                     getCoordinates(startAddress, leg.start_address, leg.start_coords),
                     getCoordinates(destAddress, leg.destination_address, leg.destination_coords)
                 ]);
 
-                // Fetch hourly forecasts and live air quality for endpoints concurrently
-                const [startHourly, destHourly, aqiHourly] = await Promise.all([
+                const [startWeatherObj, destWeatherObj, aqiHourly] = await Promise.all([
                     fetchHourlyForecast(startCoords.lat, startCoords.lon),
                     fetchHourlyForecast(destCoords.lat, destCoords.lon),
                     fetchAirQuality(destCoords.lat, destCoords.lon)
                 ]);
+
+                const startHourly = startWeatherObj.hourly;
+                const destHourly = destWeatherObj.hourly;
 
                 const aqiInfo = evaluateAirQuality(aqiHourly, destCoords, startCoords, day.day_number);
 
@@ -755,7 +760,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error('No weather data for window');
                 }
 
-                // Combine stats across the corridor
                 const depTemp = startStats.depTemp;
                 const arrTemp = destStats.arrTemp;
                 const depCode = startStats.depCode;
@@ -768,7 +772,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const maxWind = Math.max(startStats.maxWind, destStats.maxWind);
                 const isLiveForecast = startStats.isLiveForecast && destStats.isLiveForecast;
 
-                // Pick dominant weather code across both endpoints
                 let dominantCode = startStats.dominantCode;
                 const allCodes = [...startStats.allCodes, ...destStats.allCodes];
                 let hasHazard = false;
@@ -780,109 +783,88 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (!hasHazard) {
-                    // Blend start & dest codes
-                    if (depCode === 0 && arrCode === 0) dominantCode = 0;
-                    else if (depCode <= 1 && arrCode <= 1) dominantCode = 1;
-                    else if (depCode <= 2 && arrCode <= 2) dominantCode = 2;
-                    else dominantCode = (Math.max(depCode, arrCode) >= 3 && Math.min(depCode, arrCode) <= 1) ? 2 : Math.max(depCode, arrCode);
+                    dominantCode = destStats.dominantCode;
                 }
 
-                const combinedStats = {
-                    minTemp,
-                    maxTemp,
-                    avgTemp,
-                    maxPrecip,
-                    maxWind,
-                    dominantCode,
-                    depTemp,
-                    arrTemp,
-                    depCode,
-                    arrCode,
-                    isLiveForecast
+                const cond = getWeatherInfo(dominantCode);
+                const depCond = getWeatherInfo(depCode);
+                const arrCond = getWeatherInfo(arrCode);
+
+                const getPrecipBadgeClass = (p) => {
+                    if (p > 50) return 'badge-danger';
+                    if (p > 25) return 'badge-orange';
+                    if (p > 10) return 'badge-accent';
+                    return 'badge-secondary';
                 };
 
-                const weatherMeta = getWeatherInfo(combinedStats.dominantCode);
-                const depWeatherMeta = getWeatherInfo(depCode);
-                const arrWeatherMeta = getWeatherInfo(arrCode);
-                
-                const conditionLabel = (depWeatherMeta.text === arrWeatherMeta.text) 
-                    ? depWeatherMeta.text 
-                    : `${depWeatherMeta.text} \u2192 ${arrWeatherMeta.text}`;
+                const getWindBadgeClass = (w) => {
+                    if (w >= 30) return 'badge-danger';
+                    if (w >= 20) return 'badge-orange';
+                    if (w >= 14) return 'badge-accent';
+                    return 'badge-secondary';
+                };
 
-                const blurb = generateConditionBlurb(combinedStats, leg, startCoords, destCoords, startLocationName, destLocationName);
-
-                const precipClass = combinedStats.maxPrecip >= 35 ? 'precip-alert' : '';
-                const windClass = combinedStats.maxWind >= 18 ? 'wind-alert' : '';
-
-                const outlookBadgeHTML = !isLiveForecast ? `
-                    <span class="weather-pill" title="Target date is outside standard 16-day window; displaying closest available outlook">
-                        <i data-lucide="info"></i>
-                        <span>16-Day Outlook</span>
-                    </span>
-                ` : '';
+                const getAQIRowClass = (stage) => {
+                    if (stage === 'pristine') return 'aqi-pristine';
+                    if (stage === 'breakthrough') return 'aqi-good';
+                    if (stage === 'transition') return 'aqi-moderate';
+                    return 'aqi-warning';
+                };
 
                 container.innerHTML = `
-                    <div class="weather-widget-header">
-                        <div class="weather-main-info">
+                    <div class="weather-grid">
+                        <div class="weather-main-stat">
                             <div class="weather-icon-badge">
-                                <i data-lucide="${weatherMeta.icon}"></i>
+                                <i data-lucide="${cond.icon}"></i>
                             </div>
-                            <div class="weather-headline">
-                                <span class="weather-temp-range">${combinedStats.minTemp}°F – ${combinedStats.maxTemp}°F</span>
-                                <span class="weather-condition-tag">${conditionLabel} • ${leg.departs} (${startLocationName}) \u2192 ${leg.arrives} (${destLocationName})</span>
+                            <div class="weather-temp-range">
+                                <span class="temp-val">${minTemp === maxTemp ? `${avgTemp}°F` : `${minTemp}° – ${maxTemp}°F`}</span>
+                                <span class="weather-condition-text">${cond.text}</span>
                             </div>
                         </div>
-                        <div class="weather-metrics-pills">
-                            <span class="weather-pill ${precipClass}">
-                                <i data-lucide="droplet"></i>
-                                <span>${combinedStats.maxPrecip}% Precip</span>
-                            </span>
-                            <span class="weather-pill ${windClass}">
-                                <i data-lucide="wind"></i>
-                                <span>${combinedStats.maxWind} mph Wind</span>
-                            </span>
-                            <span class="weather-pill" title="Departure (${startLocationName} at ${leg.departs}) \u2192 Arrival (${destLocationName} at ${leg.arrives})">
-                                <i data-lucide="thermometer"></i>
-                                <span>${combinedStats.depTemp}°F \u2192 ${combinedStats.arrTemp}°F</span>
-                            </span>
-                            ${outlookBadgeHTML}
-                        </div>
-                    </div>
-                    
-                    <!-- Clean Air & Sinus Relief Tracker Row -->
-                    <div class="aqi-sinus-row ${aqiInfo.badgeClass}">
-                        <div class="aqi-tags-group">
-                            <span class="aqi-status-pill">
-                                <i data-lucide="${aqiInfo.icon}"></i>
-                                <span>AQI ${aqiInfo.aqi} • ${aqiInfo.statusText}</span>
-                            </span>
-                            <span class="sinus-score-pill">
-                                <i data-lucide="shield-check"></i>
-                                <span>${aqiInfo.sinusHeadline}</span>
-                            </span>
-                        </div>
-                        <p class="aqi-detail-note">${aqiInfo.sinusBlurb}</p>
-                    </div>
 
-                    <div class="weather-blurb-box">
-                        <i data-lucide="info" class="weather-blurb-icon"></i>
-                        <span class="weather-blurb-text">${blurb}</span>
+                        <div class="weather-endpoint-readout">
+                            <div class="endpoint-node">
+                                <span class="endpoint-node-label">Depart (${startLocationName}):</span>
+                                <span class="endpoint-node-val"><i data-lucide="${depCond.icon}"></i> ${depTemp}°F (${depCond.text})</span>
+                            </div>
+                            <div class="endpoint-node">
+                                <span class="endpoint-node-label">Arrive (${destLocationName}):</span>
+                                <span class="endpoint-node-val"><i data-lucide="${arrCond.icon}"></i> ${arrTemp}°F (${arrCond.text})</span>
+                            </div>
+                        </div>
+
+                        <div class="weather-chips-row">
+                            <span class="badge ${getWindBadgeClass(maxWind)}">
+                                <i data-lucide="wind"></i>
+                                <span>Max Wind ${maxWind} mph</span>
+                            </span>
+                            <span class="badge ${getPrecipBadgeClass(maxPrecip)}">
+                                <i data-lucide="umbrella"></i>
+                                <span>Precip ${maxPrecip}%</span>
+                            </span>
+                            ${!isLiveForecast ? '<span class="badge badge-secondary" title="Simulated seasonal average baseline">Seasonal Baseline</span>' : ''}
+                        </div>
+
+                        <div class="aqi-sinus-row ${getAQIRowClass(aqiInfo.stage)}">
+                            <div class="aqi-tags-group">
+                                <span class="aqi-status-pill">
+                                    <i data-lucide="${aqiInfo.icon}"></i>
+                                    <span>${aqiInfo.statusText}</span>
+                                </span>
+                                <span class="sinus-score-badge">Sinus Ease: ${aqiInfo.sinusScore}/100</span>
+                            </div>
+                            <p class="aqi-tip-text">${aqiInfo.detail}</p>
+                        </div>
                     </div>
                 `;
                 lucide.createIcons();
             } catch (err) {
-                console.warn(`[Weather] Error for leg ${legId}:`, err);
+                console.warn(`[Weather] Error loading leg ${legId}:`, err);
                 container.innerHTML = `
-                    <div class="weather-widget-header">
-                        <div class="weather-main-info">
-                            <div class="weather-icon-badge" style="background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); border-color: var(--border-color);">
-                                <i data-lucide="cloud-off"></i>
-                            </div>
-                            <div class="weather-headline">
-                                <span class="weather-temp-range" style="font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6);">Road Weather Unavailable</span>
-                                <span class="weather-condition-tag">Transit window: ${leg.departs} – ${leg.arrives}</span>
-                            </div>
-                        </div>
+                    <div class="weather-error-badge">
+                        <i data-lucide="cloud-off"></i>
+                        <span>Weather data temporarily unavailable</span>
                     </div>
                 `;
                 lucide.createIcons();
@@ -890,89 +872,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- State & Storage Helpers ---
+    // --- Completion State Management ---
+
     function getLegId(leg) {
-        return (leg.name + leg.departs + leg.route_details).replace(/[^a-zA-Z0-9]/g, '');
+        return `${leg.name.toLowerCase().replace(/\s+/g, '-')}-${leg.departs.replace(/[:\s]/g, '')}`;
     }
 
     function isLegCompleted(legId) {
-        return localStorage.getItem(`completed_${legId}`) === 'true';
+        return localStorage.getItem(`convoy_leg_completed_${legId}`) === 'true';
     }
 
     function toggleLegCompletion(legId) {
         const current = isLegCompleted(legId);
-        localStorage.setItem(`completed_${legId}`, (!current).toString());
+        localStorage.setItem(`convoy_leg_completed_${legId}`, (!current).toString());
         updateOverallProgress();
-        renderTabs(); // Re-render tabs to update checkmarks
+        renderTabs();
     }
 
-    function getCustomAddress(legId, type) {
-        return localStorage.getItem(`custom_${type}_${legId}`) || '';
-    }
-
-    function setCustomAddress(legId, type, value) {
-        if (value.trim() === '') {
-            localStorage.removeItem(`custom_${type}_${legId}`);
-        } else {
-            localStorage.setItem(`custom_${type}_${legId}`, value.trim());
-        }
-    }
-
-    function clearCustomAddress(legId, type) {
-        localStorage.removeItem(`custom_${type}_${legId}`);
+    function isLastLegOfDay(legId) {
+        const day = itineraryData.find(d => d.day_number === activeDayNumber);
+        if (!day || !day.legs.length) return false;
+        const lastLeg = day.legs[day.legs.length - 1];
+        return getLegId(lastLeg) === legId;
     }
 
     function getFirstUncompletedDay() {
         for (const day of itineraryData) {
-            const allCompleted = day.legs.every(leg => isLegCompleted(getLegId(leg)));
-            if (!allCompleted) {
+            const hasUncompleted = day.legs.some(leg => !isLegCompleted(getLegId(leg)));
+            if (hasUncompleted) {
                 return day.day_number;
             }
         }
         return 1;
     }
 
-    function isLastLegOfDay(legId) {
-        const day = itineraryData.find(d => d.day_number === activeDayNumber);
-        if (!day || !day.legs || day.legs.length === 0) return false;
-        const lastLeg = day.legs[day.legs.length - 1];
-        return getLegId(lastLeg) === legId;
-    }
-
-    function triggerCelebration() {
-        if (typeof confetti === 'function') {
-            const duration = 3000;
-            const end = Date.now() + duration;
-
-            (function frame() {
-                confetti({
-                    particleCount: 5,
-                    angle: 60,
-                    spread: 55,
-                    origin: { x: 0 },
-                    colors: ['#66d9ef', '#a6e22e', '#fd971f', '#f92672', '#ae81ff'],
-                    zIndex: 9999
-                });
-                confetti({
-                    particleCount: 5,
-                    angle: 120,
-                    spread: 55,
-                    origin: { x: 1 },
-                    colors: ['#66d9ef', '#a6e22e', '#fd971f', '#f92672', '#ae81ff'],
-                    zIndex: 9999
-                });
-
-                if (Date.now() < end) {
-                    requestAnimationFrame(frame);
-                }
-            }());
-        }
-    }
-
-    // --- Progress Calculation ---
     function updateOverallProgress() {
-        if (itineraryData.length === 0) return;
-        
+        if (!itineraryData.length) return;
+
         let totalLegs = 0;
         let completedLegs = 0;
 
@@ -985,16 +921,49 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        const percentage = totalLegs > 0 ? Math.round((completedLegs / totalLegs) * 100) : 0;
-        progressBarFill.style.width = `${percentage}%`;
-        progressText.textContent = `${percentage}% (${completedLegs}/${totalLegs} legs)`;
+        const percentage = Math.round((completedLegs / totalLegs) * 100);
+        
+        if (progressBarFill) {
+            progressBarFill.style.width = `${percentage}%`;
+        }
+        if (progressText) {
+            progressText.textContent = `${percentage}%`;
+        }
     }
 
-    // --- Rendering Functions ---
+    function triggerCelebration() {
+        if (typeof confetti === 'function') {
+            confetti({
+                particleCount: 80,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+    }
+
+    // --- Custom Address Overrides ---
+
+    function getCustomAddress(legId, type) {
+        return localStorage.getItem(`convoy_custom_addr_${legId}_${type}`);
+    }
+
+    function setCustomAddress(legId, type, address) {
+        if (!address || address.trim() === '') {
+            clearCustomAddress(legId, type);
+        } else {
+            localStorage.setItem(`convoy_custom_addr_${legId}_${type}`, address.trim());
+        }
+    }
+
+    function clearCustomAddress(legId, type) {
+        localStorage.removeItem(`convoy_custom_addr_${legId}_${type}`);
+    }
+
+    // --- Rendering UI ---
 
     function renderTabs() {
         dayTabsContainer.innerHTML = '';
-        
+
         itineraryData.forEach(day => {
             const tab = document.createElement('div');
             tab.className = 'day-tab';
@@ -1002,7 +971,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 tab.classList.add('active');
             }
             
-            // Check if all legs in this day are completed
             const allCompleted = day.legs.every(leg => isLegCompleted(getLegId(leg)));
             if (allCompleted) {
                 tab.classList.add('day-tab-completed');
@@ -1018,7 +986,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             tab.addEventListener('click', () => {
                 activeDayNumber = day.day_number;
-                // Update active class on tabs
                 document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
                 renderActiveDay();
@@ -1042,9 +1009,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (day.hotel) {
             activeDayOvernightContainer.style.display = 'block';
             activeDayHotel.textContent = day.hotel;
+            
+            if (activeDayHotelDetails) {
+                if (day.hotel_info) {
+                    activeDayHotelDetails.innerHTML = `
+                        <div class="hotel-notes-line"><i data-lucide="truck"></i> <span>${day.hotel_info.parking_note}</span></div>
+                        <div class="hotel-notes-line"><i data-lucide="coffee"></i> <span>${day.hotel_info.breakfast}</span></div>
+                    `;
+                } else {
+                    activeDayHotelDetails.innerHTML = '';
+                }
+            }
         } else {
             activeDayOvernightContainer.style.display = 'none';
         }
+
+        // Render Pre-Trip Checklist
+        renderChecklist(day.day_number);
 
         // Render Sinus Relief & Clean Air Milestone Banner
         renderSinusReliefBanner(day.day_number);
@@ -1095,7 +1076,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // Resolve Facility Information
             const destFacility = getFacilityInfo(leg.destination_type);
             const destIcon = destFacility.icon;
-            const destBadgeClass = destFacility.badgeClass;
             const destLabel = destFacility.label;
 
             let startAddressHTML = '';
@@ -1126,6 +1106,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             }
 
+            // Amenities HTML
+            let amenitiesHTML = '';
+            if (leg.amenities && leg.amenities.length > 0) {
+                amenitiesHTML = `
+                    <div class="waypoint-amenities-row">
+                        ${leg.amenities.map(a => `<span class="amenity-badge">${a}</span>`).join('')}
+                    </div>
+                `;
+            }
+
             let destAddressHTML = '';
             if (activeDest) {
                 destAddressHTML = `
@@ -1147,17 +1137,43 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         ` : ''}
                         <p class="waypoint-address-text">${activeDest}</p>
+                        ${amenitiesHTML}
                     </div>
                 `;
             }
 
-            let statsPillHTML = '';
+            // Route Contextual Badges
+            let contextualBadgesHTML = '';
             if (transitStats) {
                 const durationColorClass = getDurationPillClass(transitStats);
-                statsPillHTML = `
+                contextualBadgesHTML += `
                     <div class="stats-pill ${durationColorClass}">
                         <i data-lucide="car"></i>
                         <span>${transitStats}</span>
+                    </div>
+                `;
+            }
+            if (leg.fuel_stint_miles) {
+                contextualBadgesHTML += `
+                    <div class="stats-pill stats-pill-fuel" title="Planned Stint Mileage">
+                        <i data-lucide="fuel"></i>
+                        <span>${leg.fuel_stint_miles} mi Stint</span>
+                    </div>
+                `;
+            }
+            if (leg.timezone_change) {
+                contextualBadgesHTML += `
+                    <div class="stats-pill stats-pill-tz" title="Time Zone Shift">
+                        <i data-lucide="clock"></i>
+                        <span>${leg.timezone_change}</span>
+                    </div>
+                `;
+            }
+            if (leg.pass_name) {
+                contextualBadgesHTML += `
+                    <div class="stats-pill stats-pill-pass" title="Mountain Pass">
+                        <i data-lucide="mountain"></i>
+                        <span>${leg.pass_name}</span>
                     </div>
                 `;
             }
@@ -1180,10 +1196,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         ` : ''}
                     </div>
                     <div class="leg-header-badges">
-                        <span class="leg-time-window">
-                            <i data-lucide="clock"></i>
-                            <span>${leg.departs} – ${leg.arrives}</span>
-                        </span>
+                        <div class="leg-header-action-group">
+                            <span class="leg-time-window">
+                                <i data-lucide="clock"></i>
+                                <span>${leg.departs} – ${leg.arrives}</span>
+                            </span>
+                            <button class="btn-share-stint" data-day="${day.day_number}" data-leg-index="${index + 1}" data-leg-name="${leg.name}" data-dep="${leg.departs}" data-arr="${leg.arrives}" data-start="${getShortLocationName(activeStart)}" data-dest="${leg.destination_name || ''}" data-miles="${leg.fuel_stint_miles || ''}" title="1-Tap Share Stint to Convoy">
+                                <i data-lucide="share-2"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -1217,7 +1238,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="route-details-row">
                         <p class="route-desc-text">${routePath}</p>
-                        ${statsPillHTML}
+                        <div class="route-badges-wrap">
+                            ${contextualBadgesHTML}
+                        </div>
                     </div>
                 </div>
 
@@ -1275,13 +1298,28 @@ document.addEventListener('DOMContentLoaded', () => {
             tripDateInput.addEventListener('change', (e) => {
                 if (e.target.value) {
                     localStorage.setItem('convoy_trip_start_date', e.target.value);
-                    weatherCache.clear(); // Clear cached weather on date change to refresh forecast
+                    weatherCache.clear();
                     renderActiveDay();
                 }
             });
         }
 
-        // PDF Modal triggers (safeguarded)
+        // Pre-Trip Checklist Drawer Toggle
+        if (toggleChecklistBtn && checklistDrawer && checklistChevron) {
+            toggleChecklistBtn.addEventListener('click', () => {
+                const isCollapsed = checklistDrawer.classList.toggle('collapsed');
+                checklistChevron.style.transform = isCollapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+            });
+        }
+
+        // Convoy Hub Modal triggers
+        if (convoyHubBtn && convoyHubModal) {
+            convoyHubBtn.addEventListener('click', () => convoyHubModal.classList.add('active'));
+            if (closeConvoyHubBtn) closeConvoyHubBtn.addEventListener('click', () => convoyHubModal.classList.remove('active'));
+            if (closeConvoyHubFooterBtn) closeConvoyHubFooterBtn.addEventListener('click', () => convoyHubModal.classList.remove('active'));
+        }
+
+        // PDF Modal triggers
         const pdfFrame = document.getElementById('pdf-frame');
 
         if (viewPdfBtn && pdfModal) {
@@ -1330,10 +1368,19 @@ document.addEventListener('DOMContentLoaded', () => {
             renderActiveDay();
         });
 
-        // Close modal when clicking outside modal-card
+        // Close modal when clicking outside modal-card or pressing Escape
         window.addEventListener('click', (e) => {
             if (e.target === pdfModal) closePDF();
             if (e.target === editModal) closeEdit();
+            if (e.target === convoyHubModal) convoyHubModal.classList.remove('active');
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (pdfModal && pdfModal.classList.contains('active')) closePDF();
+                if (editModal && editModal.classList.contains('active')) closeEdit();
+                if (convoyHubModal && convoyHubModal.classList.contains('active')) convoyHubModal.classList.remove('active');
+            }
         });
     }
 
@@ -1346,7 +1393,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let scrollLeft = 0;
         let isDragging = false;
 
-        // Pointer down on tab bar (only primary left click)
         slider.addEventListener('pointerdown', (e) => {
             if (e.pointerType !== 'mouse' || e.button !== 0) return;
             isDown = true;
@@ -1392,7 +1438,6 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', (e) => {
                 const legId = btn.getAttribute('data-leg-id');
                 
-                // Animate card before refreshing
                 const card = document.getElementById(`leg-card-${legId}`);
                 if (card) {
                     card.style.transform = 'scale(0.99)';
@@ -1408,6 +1453,51 @@ document.addEventListener('DOMContentLoaded', () => {
                         triggerCelebration();
                     }
                 }, 150);
+            });
+        });
+
+        // 1-Tap Share Stint Status
+        document.querySelectorAll('.btn-share-stint').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dayNum = btn.getAttribute('data-day');
+                const legIndex = btn.getAttribute('data-leg-index');
+                const legName = btn.getAttribute('data-leg-name');
+                const dep = btn.getAttribute('data-dep');
+                const arr = btn.getAttribute('data-arr');
+                const start = btn.getAttribute('data-start');
+                const dest = btn.getAttribute('data-dest');
+                const miles = btn.getAttribute('data-miles');
+
+                const shareText = `🚚 Convoy Update (Day ${dayNum} • Leg ${legIndex}): Starting ${legName} from ${start} to ${dest}${miles ? ` (${miles} mi)` : ''}. Dep: ${dep} | Est. Arrival: ${arr}.`;
+
+                if (navigator.share) {
+                    navigator.share({
+                        title: `Convoy Day ${dayNum} - ${legName}`,
+                        text: shareText
+                    }).catch(err => {
+                        console.log('[Share] Dismissed:', err);
+                    });
+                } else {
+                    navigator.clipboard.writeText(shareText).then(() => {
+                        const icon = btn.querySelector('i');
+                        btn.classList.add('btn-share-copied');
+                        if (icon) {
+                            icon.setAttribute('data-lucide', 'check');
+                            lucide.createIcons();
+                        }
+
+                        setTimeout(() => {
+                            btn.classList.remove('btn-share-copied');
+                            if (icon) {
+                                icon.setAttribute('data-lucide', 'share-2');
+                                lucide.createIcons();
+                            }
+                        }, 2000);
+                    }).catch(err => {
+                        console.warn('[Share] Clipboard error:', err);
+                    });
+                }
             });
         });
 
@@ -1435,22 +1525,15 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', () => {
                 const destination = btn.getAttribute('data-destination');
                 
-                // Device detection to open Apple Maps on Apple devices and Google Maps elsewhere
                 const isApple = /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent);
                 
                 let mapsUrl = '';
                 if (isApple) {
-                    // Apple Maps format: maps://?daddr=URL_ENCODED_DEST&dirflg=d (drive)
                     mapsUrl = `maps://?daddr=${encodeURIComponent(destination)}&dirflg=d`;
                 } else {
-                    // Google Maps format
                     mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`;
                 }
-
-                console.log(`[Nav] Destination: ${destination}`);
-                console.log(`[Nav] Opening URL: ${mapsUrl}`);
                 
-                // Open link
                 window.open(mapsUrl, '_blank');
             });
         });

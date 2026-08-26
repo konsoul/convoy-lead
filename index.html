@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Convoy Lead — Cross-Country Caravan Itinerary</title>
+    <!-- PWA Manifest & Theme -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a84ff">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=4.3">
+    <link rel="stylesheet" href="style.css?v=5.0">
 </head>
 <body>
     <div class="app-container">
@@ -28,7 +31,11 @@
                         </label>
                         <input type="date" id="trip-start-date" class="trip-date-input" title="Set Caravan Start Date">
                     </div>
-                    <button id="view-pdf-btn" class="btn btn-secondary">
+                    <button id="convoy-hub-btn" class="btn btn-secondary" title="Convoy Comms & Road Conditions">
+                        <i data-lucide="radio"></i>
+                        <span>Convoy Hub</span>
+                    </button>
+                    <button id="view-pdf-btn" class="btn btn-secondary" title="Original Itinerary PDF">
                         <i data-lucide="file-text"></i>
                         <span>Original PDF</span>
                     </button>
@@ -100,12 +107,36 @@
                 </div>
                 <div id="active-day-overnight-container" class="day-overnight-info">
                     <hr class="card-divider">
-                    <span class="section-eyebrow">Overnight Stay</span>
-                    <div class="hotel-pill">
-                        <i data-lucide="bed"></i>
-                        <span id="active-day-hotel">Loading...</span>
+                    <span class="section-eyebrow">Overnight Stay & Convoy Staging</span>
+                    <div class="hotel-info-block">
+                        <div class="hotel-pill">
+                            <i data-lucide="bed"></i>
+                            <span id="active-day-hotel">Loading...</span>
+                        </div>
+                        <div id="active-day-hotel-details" class="hotel-details-text"></div>
                     </div>
                 </div>
+
+                <!-- Collapsible Pre-Trip Morning Checklist -->
+                <div id="day-checklist-container" class="day-checklist-container">
+                    <hr class="card-divider">
+                    <button id="toggle-checklist-btn" class="checklist-toggle-btn" type="button">
+                        <div class="checklist-toggle-left">
+                            <i data-lucide="check-square"></i>
+                            <span>Pre-Trip Morning Checklist</span>
+                        </div>
+                        <div class="checklist-toggle-right">
+                            <span id="checklist-progress-badge" class="checklist-badge">0/5 Done</span>
+                            <i data-lucide="chevron-down" id="checklist-chevron" class="checklist-chevron"></i>
+                        </div>
+                    </button>
+                    <div id="checklist-drawer" class="checklist-drawer collapsed">
+                        <div class="checklist-items-grid" id="checklist-items">
+                            <!-- Injected dynamically per day -->
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Clean Air & Sinus Relief Milestone Banner -->
                 <div id="day-sinus-relief-banner"></div>
             </div>
@@ -119,6 +150,70 @@
         <footer class="app-footer">
             <p>Convoy Lead &copy; 2026. Safe travels.</p>
         </footer>
+    </div>
+
+    <!-- Convoy Hub Modal -->
+    <div id="convoy-hub-modal" class="modal-overlay">
+        <div class="modal-card convoy-hub-modal-card">
+            <div class="modal-header">
+                <div class="modal-title-with-icon">
+                    <i data-lucide="radio"></i>
+                    <h3>Convoy Communications & Highway Hub</h3>
+                </div>
+                <button id="close-convoy-hub-btn" class="btn-close"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <!-- Radio Comms Box -->
+                <div class="hub-section-box">
+                    <div class="hub-section-header">
+                        <i data-lucide="mic"></i>
+                        <h4>Fleet Radio Channels</h4>
+                    </div>
+                    <div class="hub-comms-grid">
+                        <div class="hub-comm-card">
+                            <span class="hub-comm-label">CB Radio</span>
+                            <span class="hub-comm-value">Channel 19</span>
+                            <span class="hub-comm-sub">27.185 MHz (Standard Highway)</span>
+                        </div>
+                        <div class="hub-comm-card">
+                            <span class="hub-comm-label">GMRS Radio</span>
+                            <span class="hub-comm-value">Channel 7</span>
+                            <span class="hub-comm-sub">462.7125 MHz (Convoy Primary)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live DOT Highway Feeds -->
+                <div class="hub-section-box">
+                    <div class="hub-section-header">
+                        <i data-lucide="activity"></i>
+                        <h4>State DOT Road Conditions & Cameras</h4>
+                    </div>
+                    <div class="dot-links-grid">
+                        <a href="https://www.tennesseetraffic.org/" target="_blank" rel="noopener" class="dot-link-btn"><span>Tennessee TDOT SmartWay</span><i data-lucide="external-link"></i></a>
+                        <a href="https://www.idrivearkansas.com/" target="_blank" rel="noopener" class="dot-link-btn"><span>Arkansas iDrive ARDOT</span><i data-lucide="external-link"></i></a>
+                        <a href="https://www.oktraffic.org/" target="_blank" rel="noopener" class="dot-link-btn"><span>Oklahoma ODOT Traffic</span><i data-lucide="external-link"></i></a>
+                        <a href="https://drivetexas.org/" target="_blank" rel="noopener" class="dot-link-btn"><span>Texas DriveTexas.org</span><i data-lucide="external-link"></i></a>
+                        <a href="https://www.nmroads.com/" target="_blank" rel="noopener" class="dot-link-btn"><span>New Mexico NMRoads</span><i data-lucide="external-link"></i></a>
+                        <a href="https://www.az511.gov/" target="_blank" rel="noopener" class="dot-link-btn"><span>Arizona AZ511</span><i data-lucide="external-link"></i></a>
+                        <a href="https://quickmap.dot.ca.gov/" target="_blank" rel="noopener" class="dot-link-btn"><span>California Caltrans QuickMap</span><i data-lucide="external-link"></i></a>
+                        <a href="https://www.tripcheck.com/" target="_blank" rel="noopener" class="dot-link-btn"><span>Oregon TripCheck (ODOT)</span><i data-lucide="external-link"></i></a>
+                    </div>
+                </div>
+
+                <!-- Offline Status & Storage -->
+                <div class="hub-section-box">
+                    <div class="hub-section-header">
+                        <i data-lucide="shield-check"></i>
+                        <h4>Offline Caravan Readiness</h4>
+                    </div>
+                    <p class="hub-pwa-desc">This app is cached locally for 100% offline access when driving through mountain passes and remote desert zones. Map directions launch directly in Apple Maps or Google Maps native apps.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="close-convoy-hub-footer-btn" class="btn btn-primary">Close Hub</button>
+            </div>
+        </div>
     </div>
 
     <!-- PDF Viewer Modal -->
@@ -166,6 +261,6 @@
     </div>
 
     <!-- Script Entrypoint -->
-    <script src="app.js?v=4.3"></script>
+    <script src="app.js?v=5.0"></script>
 </body>
 </html>
