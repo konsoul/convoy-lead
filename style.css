@@ -1034,16 +1034,6 @@ h3 {
     height: 18px;
 }
 
-.btn-copy-address {
-    padding: 13px 18px;
-    font-weight: 600;
-    font-size: 13.5px;
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    white-space: nowrap;
-}
-
 /* --- Compartmentalized Section Boxes --- */
 .leg-section-box {
     background: rgba(255, 255, 255, 0.025);
@@ -1338,7 +1328,6 @@ h3 {
 }
 
 .leg-card.completed .btn-nav-directions,
-.leg-card.completed .btn-copy-address,
 .leg-card.completed .btn-edit-address {
     background-color: rgba(255, 255, 255, 0.04);
     color: #64748b;

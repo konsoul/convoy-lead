@@ -1194,10 +1194,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         <i data-lucide="navigation"></i>
                         <span>Start Directions</span>
                     </button>
-                    <button class="btn btn-secondary btn-copy-address" data-address="${activeDest}" title="Copy Address">
-                        <i data-lucide="copy"></i>
-                        <span>Copy Address</span>
-                    </button>
                 </div>
                 ` : ''}
 
@@ -1431,35 +1427,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 editModal.classList.add('active');
                 addressTextarea.focus();
-            });
-        });
-
-        // Copy address to clipboard
-        document.querySelectorAll('.btn-copy-address').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const address = btn.getAttribute('data-address');
-                navigator.clipboard.writeText(address).then(() => {
-                    // Quick feedback transition
-                    const icon = btn.querySelector('i');
-                    btn.classList.add('btn-green');
-                    btn.classList.remove('btn-secondary');
-                    
-                    if (icon) {
-                        icon.setAttribute('data-lucide', 'check');
-                        lucide.createIcons();
-                    }
-
-                    setTimeout(() => {
-                        btn.classList.remove('btn-green');
-                        btn.classList.add('btn-secondary');
-                        if (icon) {
-                            icon.setAttribute('data-lucide', 'copy');
-                            lucide.createIcons();
-                        }
-                    }, 1800);
-                }).catch(err => {
-                    console.error('Could not copy text: ', err);
-                });
             });
         });
 
