@@ -15,8 +15,8 @@
       "legs": [
         {
           "name": "Morning Stretch",
-          "departs": "07:00 AM",
-          "arrives": "08:50 AM",
+          "departs": "08:00 AM",
+          "arrives": "09:50 AM",
           "route_details": "Canton, GA → 1855 US Highway 72 E, Huntsville, AL 35811 (153 miles, approx. 2 hrs 50 mins)",
           "operational_notes": "GA-20 W to Rome, GA and AL-35 / US-72 W through Scottsboro into Huntsville. Gains 1 hour across time zone line (EDT to CDT). Plan a 30-minute staging and fueling break at RaceTrac Travel Plaza upon arrival.",
           "start_name": "Canton, GA (Origin)",
@@ -32,8 +32,8 @@
         },
         {
           "name": "Midday Run",
-          "departs": "09:20 AM",
-          "arrives": "12:30 PM",
+          "departs": "10:20 AM",
+          "arrives": "01:30 PM",
           "route_details": "1855 US Highway 72 E, Huntsville, AL 35811 → 4740 Bethel Rd, Olive Branch, MS 38654 (185 miles, approx. 3 hrs 10 mins)",
           "operational_notes": "Direct four-lane transit on US-72 W past Athens, Florence, and Corinth into northern Mississippi to Flying J Travel Center #677 at I-269 / Bethel Rd. Plan a 30-minute lunch and fueling break.",
           "start_name": "RaceTrac Travel Center (US-72 E)",
@@ -48,10 +48,10 @@
         },
         {
           "name": "Evening Stretch",
-          "departs": "01:00 PM",
-          "arrives": "03:25 PM",
+          "departs": "02:00 PM",
+          "arrives": "04:25 PM",
           "route_details": "4740 Bethel Rd, Olive Branch, MS 38654 → 4900 Talley Road, Little Rock, AR 72204 (155 miles, approx. 2 hrs 25 mins)",
-          "operational_notes": "Fastest leg taking I-269 to I-55 across the Mississippi River, connecting directly to I-40 W into Little Rock and I-430 S (Exit 4). Arrives early at the hotel destination by 3:25 PM in broad daylight.",
+          "operational_notes": "Fastest leg taking I-269 to I-55 across the Mississippi River, connecting directly to I-40 W into Little Rock and I-430 S (Exit 4). Arrives at the hotel destination at 4:25 PM with over 3 hours of daylight remaining.",
           "start_name": "Flying J Travel Center (#677)",
           "start_address": "4740 Bethel Road, Olive Branch, MS 38654",
           "start_coords": { "lat": 34.9485, "lon": -89.8458 },
