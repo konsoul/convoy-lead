@@ -263,15 +263,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!transitStats) return 'stats-pill-green';
         
         let totalMinutes = 0;
-        const hoursMatch = transitStats.match(/(\d+)\s*(?:hr|hour)s?/i);
-        const minsMatch = transitStats.match(/(\d+)\s*(?:min|minute)s?/i);
+        const hoursMatch = transitStats.match(/(\d+)\s*(?:hrs?|hours?)/i);
+        const minsMatch = transitStats.match(/(\d+)\s*(?:mins?|minutes?)/i);
         
         if (hoursMatch) totalMinutes += parseInt(hoursMatch[1], 10) * 60;
         if (minsMatch) totalMinutes += parseInt(minsMatch[1], 10);
         
-        if (totalMinutes > 210) {
+        if (totalMinutes > 165) {
             return 'stats-pill-red';
-        } else if (totalMinutes > 150) {
+        } else if (totalMinutes >= 120) {
             return 'stats-pill-orange';
         } else {
             return 'stats-pill-green';
@@ -298,6 +298,69 @@ document.addEventListener('DOMContentLoaded', () => {
             return `${miles} • ${timeStr}`;
         }
         return miles || timeStr || rawStats;
+    }
+
+    function getLegVibe(leg, transitStats) {
+        let totalMinutes = 0;
+        let miles = leg.fuel_stint_miles || null;
+        let timeStr = '';
+
+        const sourceText = transitStats || leg.route_details || '';
+        if (sourceText) {
+            const hoursMatch = sourceText.match(/(\d+)\s*(?:hrs?|hours?)/i);
+            const minsMatch = sourceText.match(/(\d+)\s*(?:mins?|minutes?)/i);
+            const milesMatch = sourceText.match(/(\d+)\s*(?:miles?|mi)/i);
+            
+            if (milesMatch && !miles) miles = parseInt(milesMatch[1], 10);
+            if (hoursMatch) totalMinutes += parseInt(hoursMatch[1], 10) * 60;
+            if (minsMatch) totalMinutes += parseInt(minsMatch[1], 10);
+
+            if (hoursMatch && minsMatch) {
+                timeStr = `${hoursMatch[1]}h ${minsMatch[1]}m`;
+            } else if (hoursMatch) {
+                timeStr = `${hoursMatch[1]}h`;
+            } else if (minsMatch) {
+                timeStr = `${minsMatch[1]}m`;
+            }
+        }
+
+        const distanceDisplay = miles ? `${miles} mi` : '';
+
+        // Tiers:
+        // 1. Under 2 hrs (< 120 mins): "ITS A QUICK ONE!!"
+        // 2. Under 2 hrs 45 mins (<= 165 mins): "Nice short leg!"
+        // 3. Over 2 hrs 45 mins (> 165 mins): "Got a long one coming, buckle in!"
+        if (totalMinutes > 0 && totalMinutes < 120) {
+            return {
+                type: 'quick',
+                badgeClass: 'leg-vibe-quick',
+                icon: 'zap',
+                headline: "ITS A QUICK ONE!!",
+                subtext: "Under 2 hrs • Quick cruise ahead!",
+                distanceText: distanceDisplay,
+                durationText: timeStr
+            };
+        } else if (totalMinutes <= 165 && totalMinutes > 0) {
+            return {
+                type: 'short',
+                badgeClass: 'leg-vibe-short',
+                icon: 'sparkles',
+                headline: "Nice short leg!",
+                subtext: "Under 2h 45m • Smooth driving stretch",
+                distanceText: distanceDisplay,
+                durationText: timeStr
+            };
+        } else {
+            return {
+                type: 'long',
+                badgeClass: 'leg-vibe-long',
+                icon: 'coffee',
+                headline: "Got a long one coming, buckle in!",
+                subtext: "Over 2h 45m • Settle in & pace yourself",
+                distanceText: distanceDisplay,
+                durationText: timeStr
+            };
+        }
     }
 
     // --- Pre-Trip Morning Checklist Management ---
@@ -1232,11 +1295,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             }
 
+            // Compute Leg Vibe & Distance Teaser (Directly above Directions Button)
+            const legVibe = getLegVibe(leg, transitStats);
+            const vibeHTML = `
+                <div class="leg-vibe-banner ${legVibe.badgeClass}">
+                    <div class="leg-vibe-main">
+                        <div class="leg-vibe-icon-wrap">
+                            <i data-lucide="${legVibe.icon}"></i>
+                        </div>
+                        <div class="leg-vibe-content">
+                            <span class="leg-vibe-headline">${legVibe.headline}</span>
+                            <span class="leg-vibe-subtext">${legVibe.subtext}</span>
+                        </div>
+                    </div>
+                    <div class="leg-vibe-stats-pill">
+                        <i data-lucide="map-pin" class="vibe-pin-icon"></i>
+                        ${legVibe.distanceText ? `<span class="vibe-stat-distance">${legVibe.distanceText}</span>` : ''}
+                        ${legVibe.distanceText && legVibe.durationText ? `<span class="vibe-stat-dot">•</span>` : ''}
+                        ${legVibe.durationText ? `<span class="vibe-stat-duration">${legVibe.durationText}</span>` : ''}
+                    </div>
+                </div>
+            `;
+
             card.innerHTML = `
                 <!-- 1. TOP STRETCH NAME HEADER BANNER -->
                 ${stretchHeaderHTML}
                 
-                <!-- 2. TOP HERO NAVIGATION ACTION BUTTON -->
+                <!-- 2. LEG VIBE & DISTANCE TEASER (Directly Above Directions Button) -->
+                ${vibeHTML}
+
+                <!-- 3. TOP HERO NAVIGATION ACTION BUTTON -->
                 ${activeDest ? `
                 <div class="top-nav-action-bar">
                     <button class="btn btn-green btn-nav-directions btn-nav-primary" data-destination="${activeDest}">

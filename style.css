@@ -1330,6 +1330,165 @@ h3 {
     margin: 0;
 }
 
+/* --- Leg Vibe & Distance Teaser Banner (Directly Above Directions CTA) --- */
+.leg-vibe-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.leg-vibe-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.leg-vibe-icon-wrap {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.leg-vibe-icon-wrap i {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2.2;
+}
+
+.leg-vibe-content {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.leg-vibe-headline {
+    font-size: 13.5px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.leg-vibe-subtext {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.65);
+    margin-top: 1px;
+    line-height: 1.2;
+}
+
+.leg-vibe-stats-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    white-space: nowrap;
+    flex-shrink: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.leg-vibe-stats-pill i.vibe-pin-icon {
+    width: 13px;
+    height: 13px;
+    opacity: 0.8;
+}
+
+.vibe-stat-dot {
+    opacity: 0.45;
+}
+
+/* Quick Leg (< 2h) - Monokai Green (matches stats-pill-green) */
+.leg-vibe-quick {
+    background: linear-gradient(135deg, rgba(166, 226, 46, 0.16) 0%, rgba(166, 226, 46, 0.08) 100%);
+    border-color: rgba(166, 226, 46, 0.35);
+    box-shadow: 0 4px 16px rgba(166, 226, 46, 0.12);
+}
+
+.leg-vibe-quick .leg-vibe-icon-wrap {
+    background: rgba(166, 226, 46, 0.22);
+    color: var(--green);
+    box-shadow: 0 0 10px rgba(166, 226, 46, 0.25);
+}
+
+.leg-vibe-quick .leg-vibe-headline {
+    color: var(--green);
+    text-shadow: 0 0 12px rgba(166, 226, 46, 0.25);
+}
+
+.leg-vibe-quick .leg-vibe-stats-pill {
+    border: 1px solid rgba(166, 226, 46, 0.35);
+    color: var(--green);
+}
+
+/* Short Leg (2h - 2h45m) - Monokai Orange (matches stats-pill-orange) */
+.leg-vibe-short {
+    background: linear-gradient(135deg, rgba(253, 151, 31, 0.16) 0%, rgba(253, 151, 31, 0.08) 100%);
+    border-color: rgba(253, 151, 31, 0.35);
+    box-shadow: 0 4px 16px rgba(253, 151, 31, 0.12);
+}
+
+.leg-vibe-short .leg-vibe-icon-wrap {
+    background: rgba(253, 151, 31, 0.22);
+    color: var(--orange);
+    box-shadow: 0 0 10px rgba(253, 151, 31, 0.25);
+}
+
+.leg-vibe-short .leg-vibe-headline {
+    color: var(--orange);
+    text-shadow: 0 0 12px rgba(253, 151, 31, 0.25);
+}
+
+.leg-vibe-short .leg-vibe-stats-pill {
+    border: 1px solid rgba(253, 151, 31, 0.35);
+    color: var(--orange);
+}
+
+/* Long Leg (> 2h45m) - Monokai Red/Pink (matches stats-pill-red / danger) */
+.leg-vibe-long {
+    background: linear-gradient(135deg, rgba(249, 38, 114, 0.16) 0%, rgba(249, 38, 114, 0.08) 100%);
+    border-color: rgba(249, 38, 114, 0.4);
+    box-shadow: 0 4px 16px rgba(249, 38, 114, 0.12);
+}
+
+.leg-vibe-long .leg-vibe-icon-wrap {
+    background: rgba(249, 38, 114, 0.22);
+    color: var(--danger);
+    box-shadow: 0 0 10px rgba(249, 38, 114, 0.25);
+}
+
+.leg-vibe-long .leg-vibe-headline {
+    color: var(--danger);
+    text-shadow: 0 0 12px rgba(249, 38, 114, 0.25);
+}
+
+.leg-vibe-long .leg-vibe-stats-pill {
+    border: 1px solid rgba(249, 38, 114, 0.4);
+    color: var(--danger);
+}
+
 /* --- Top Prominent Navigation Action Bar (Card Hero Header) --- */
 .top-nav-action-bar {
     display: flex;
@@ -1722,6 +1881,22 @@ h3 {
     background: #1e293b;
     color: #64748b;
     box-shadow: none;
+}
+
+.leg-card.completed .leg-vibe-banner {
+    opacity: 0.55;
+    box-shadow: none;
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.leg-card.completed .leg-vibe-banner .leg-vibe-headline,
+.leg-card.completed .leg-vibe-banner .leg-vibe-icon-wrap,
+.leg-card.completed .leg-vibe-banner .leg-vibe-stats-pill {
+    color: #94a3b8;
+    text-shadow: none;
+    box-shadow: none;
+    border-color: rgba(255, 255, 255, 0.08);
 }
 
 .leg-card.completed .weather-widget {
@@ -2530,6 +2705,43 @@ h3 {
         font-size: 11px;
         padding: 3px 7px;
         white-space: nowrap;
+    }
+
+    /* Leg Vibe & Distance Banner */
+    .leg-vibe-banner {
+        padding: 8px 11px;
+        gap: 8px;
+        margin-bottom: 9px;
+        border-radius: 10px;
+    }
+
+    .leg-vibe-main {
+        gap: 8px;
+    }
+
+    .leg-vibe-icon-wrap {
+        width: 30px;
+        height: 30px;
+        border-radius: 7px;
+    }
+
+    .leg-vibe-icon-wrap i {
+        width: 15px;
+        height: 15px;
+    }
+
+    .leg-vibe-headline {
+        font-size: 12.5px;
+    }
+
+    .leg-vibe-subtext {
+        font-size: 10.5px;
+    }
+
+    .leg-vibe-stats-pill {
+        font-size: 11px;
+        padding: 4px 8px;
+        gap: 4px;
     }
 
     /* Prominent Directions CTA */
