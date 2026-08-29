@@ -1,4 +1,4 @@
-const CACHE_NAME = 'convoy-lead-v18.1';
+const CACHE_NAME = 'convoy-lead-v18.2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
