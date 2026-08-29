@@ -2,8 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
     <title>Convoy Lead — Cross-Country Caravan Itinerary</title>
+    <!-- iOS / PWA Mobile Optimization -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Convoy Lead">
+    <meta name="mobile-web-app-capable" content="yes">
     <!-- PWA Manifest & Theme -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0a84ff">
@@ -11,7 +16,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=5.3">
+    <link rel="stylesheet" href="style.css?v=17.0">
 </head>
 <body>
     <div class="app-container">
@@ -24,11 +29,11 @@
                     <p class="route-subtitle">Canton, GA <i data-lucide="arrow-right" class="subtitle-arrow"></i> Canyonville, OR</p>
                 </div>
                 <div class="header-actions">
-                    <div class="trip-date-control">
-                        <label for="trip-start-date" class="trip-date-label">
+                    <div class="trip-date-control" id="trip-date-control">
+                        <div class="trip-date-label">
                             <i data-lucide="calendar"></i>
                             <span>Trip Start</span>
-                        </label>
+                        </div>
                         <input type="date" id="trip-start-date" class="trip-date-input" title="Set Caravan Start Date">
                     </div>
                     <button id="convoy-hub-btn" class="btn btn-secondary" title="Convoy Comms & Road Conditions">
@@ -43,32 +48,8 @@
             </div>
         </header>
 
-        <!-- Stats Grid & Progress -->
+        <!-- Overall Progress -->
         <section class="stats-section">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon-wrapper"><i data-lucide="calendar"></i></div>
-                    <div class="stat-info">
-                        <span class="stat-label">Duration</span>
-                        <span class="stat-value">6 Days</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon-wrapper"><i data-lucide="map-pin"></i></div>
-                    <div class="stat-info">
-                        <span class="stat-label">Total Stops</span>
-                        <span class="stat-value">16 Stops</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon-wrapper"><i data-lucide="navigation"></i></div>
-                    <div class="stat-info">
-                        <span class="stat-label">Total Distance</span>
-                        <span class="stat-value">2,850+ Miles</span>
-                    </div>
-                </div>
-            </div>
-            
             <div class="overall-progress-container">
                 <div class="progress-info">
                     <span class="progress-label">Overall Completion</span>
@@ -90,34 +71,22 @@
         <!-- Active Day Panel -->
         <main class="main-content">
             <div class="day-header-card">
+                <!-- 1. Top Day Header Banner (Like Stretch Cards) -->
+                <div class="day-top-header-banner" id="active-day-header-banner">
+                    <i data-lucide="calendar"></i>
+                    <span id="active-day-badge">Day 1</span>
+                </div>
+
+                <!-- 2. Day Title & Target -->
                 <div class="day-header-meta">
-                    <div class="day-badge-row">
-                        <span id="active-day-badge" class="badge badge-primary">Day 1</span>
-                    </div>
                     <h2 id="active-day-title">Loading Day Details...</h2>
                 </div>
-                <div id="day-weather-summary-pill" class="day-weather-pill" style="display: none;">
-                    <i data-lucide="sun"></i>
-                    <span id="day-weather-summary-text">Loading...</span>
-                </div>
-                <hr class="card-divider">
                 <div class="day-target-info">
                     <span class="section-eyebrow">Daily Target</span>
                     <p id="active-day-target" class="target-text">Loading...</p>
                 </div>
-                <div id="active-day-overnight-container" class="day-overnight-info">
-                    <hr class="card-divider">
-                    <span class="section-eyebrow">Overnight Stay & Convoy Staging</span>
-                    <div class="hotel-info-block">
-                        <div class="hotel-pill">
-                            <i data-lucide="bed"></i>
-                            <span id="active-day-hotel">Loading...</span>
-                        </div>
-                        <div id="active-day-hotel-details" class="hotel-details-text"></div>
-                    </div>
-                </div>
 
-                <!-- Collapsible Pre-Trip Morning Checklist -->
+                <!-- 3. Collapsible Pre-Trip Morning Checklist (Right below Title Header) -->
                 <div id="day-checklist-container" class="day-checklist-container">
                     <hr class="card-divider">
                     <button id="toggle-checklist-btn" class="checklist-toggle-btn" type="button">
@@ -137,13 +106,31 @@
                     </div>
                 </div>
 
-                <!-- Clean Air & Sinus Relief Milestone Banner -->
+                <!-- 4. Overnight Stay & Convoy Staging (White & Centered) -->
+                <div id="active-day-overnight-container" class="day-overnight-info">
+                    <hr class="card-divider">
+                    <span class="section-eyebrow overnight-eyebrow">Overnight Stay & Convoy Staging</span>
+                    <div class="hotel-info-block">
+                        <div class="hotel-pill">
+                            <i data-lucide="bed"></i>
+                            <span id="active-day-hotel">Loading...</span>
+                        </div>
+                        <div id="active-day-hotel-details" class="hotel-details-text"></div>
+                    </div>
+                </div>
+
+                <!-- 5. Clean Air & Sinus Relief Milestone Banner -->
                 <div id="day-sinus-relief-banner"></div>
             </div>
 
-            <!-- Leg Cards List -->
-            <section class="legs-section" id="legs-container">
-                <!-- Leg cards injected dynamically -->
+            <!-- Leg Cards Carousel Wrapper (1-Card Swipe View) -->
+            <section class="legs-carousel-wrapper">
+                <div class="legs-carousel-nav" id="legs-carousel-nav">
+                    <!-- Injected dynamically: Prev/Next arrows, stretch indicator & dots -->
+                </div>
+                <div class="legs-section legs-carousel-track" id="legs-container">
+                    <!-- Leg cards injected dynamically -->
+                </div>
             </section>
         </main>
 
@@ -262,6 +249,6 @@
     </div>
 
     <!-- Script Entrypoint -->
-    <script src="app.js?v=5.3"></script>
+    <script src="app.js?v=17.0"></script>
 </body>
 </html>

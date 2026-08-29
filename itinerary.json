@@ -2,7 +2,7 @@
   "itinerary": [
     {
       "day_number": 1,
-      "title": "Canton, GA to Little Rock, AR (Hotel 1)",
+      "title": "Canton, GA to Little Rock, AR",
       "start_location": "Canton, GA",
       "end_location": "Little Rock, AR",
       "hotel": "Holiday Inn Express & Suites Little Rock-West",
@@ -66,7 +66,7 @@
     },
     {
       "day_number": 2,
-      "title": "Little Rock, AR to Tucumcari, NM (Hotel 2)",
+      "title": "Little Rock, AR to Tucumcari, NM",
       "start_location": "Little Rock, AR",
       "end_location": "Tucumcari, NM",
       "hotel": "Fairfield Inn & Suites Tucumcari",
@@ -130,7 +130,7 @@
     },
     {
       "day_number": 3,
-      "title": "Tucumcari, NM to Flagstaff, AZ (Hotel 3)",
+      "title": "Tucumcari, NM to Flagstaff, AZ",
       "start_location": "Tucumcari, NM",
       "end_location": "Flagstaff, AZ",
       "hotel": "La Quinta Inn & Suites Flagstaff",
@@ -195,7 +195,7 @@
     },
     {
       "day_number": 4,
-      "title": "Flagstaff, AZ to Tehachapi, CA (Hotel 4)",
+      "title": "Flagstaff, AZ to Tehachapi, CA",
       "start_location": "Flagstaff, AZ",
       "end_location": "Tehachapi, CA",
       "hotel": "Fairfield Inn & Suites Tehachapi",
@@ -260,7 +260,7 @@
     },
     {
       "day_number": 5,
-      "title": "Tehachapi, CA to Redding, CA (Hotel 5)",
+      "title": "Tehachapi, CA to Redding, CA",
       "start_location": "Tehachapi, CA",
       "end_location": "Redding, CA",
       "hotel": "Comfort Suites Redding - Shasta Lake",
@@ -323,7 +323,7 @@
     },
     {
       "day_number": 6,
-      "title": "Redding, CA to Canyonville, OR (Home)",
+      "title": "Redding, CA to Canyonville, OR",
       "start_location": "Redding, CA",
       "end_location": "Canyonville, OR",
       "hotel": "Home",

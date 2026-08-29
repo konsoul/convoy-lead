@@ -3,13 +3,24 @@
  * Technology: Vanilla ES6+ Javascript
  */
 
-// Register PWA Service Worker for 100% Offline Readiness
+// Register PWA Service Worker with active live update check
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').then(reg => {
             console.log('[SW] Registered for offline support:', reg.scope);
+            // Proactively check for newer versions on every page load
+            reg.update();
         }).catch(err => {
             console.log('[SW] Registration note:', err);
+        });
+
+        // If a new service worker takes over, reload to apply new assets
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (!refreshing) {
+                refreshing = true;
+                window.location.reload();
+            }
         });
     });
 }
@@ -48,6 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeDayHotelDetails = document.getElementById('active-day-hotel-details');
     const activeDayOvernightContainer = document.getElementById('active-day-overnight-container');
     const legsContainer = document.getElementById('legs-container');
+    const legsCarouselNav = document.getElementById('legs-carousel-nav');
+    let activeLegIndex = 0;
     
     const progressBarFill = document.getElementById('progress-bar-fill');
     const progressText = document.getElementById('progress-text');
@@ -265,6 +278,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function formatCompactTransitStats(rawStats) {
+        if (!rawStats) return '';
+        const milesMatch = rawStats.match(/(\d+)\s*(?:miles?|mi)/i);
+        const hoursMatch = rawStats.match(/(\d+)\s*(?:hrs?|hours?)/i);
+        const minsMatch = rawStats.match(/(\d+)\s*(?:mins?|minutes?)/i);
+
+        const miles = milesMatch ? `${milesMatch[1]} mi` : '';
+        let timeStr = '';
+        if (hoursMatch && minsMatch) {
+            timeStr = `${hoursMatch[1]}h ${minsMatch[1]}m`;
+        } else if (hoursMatch) {
+            timeStr = `${hoursMatch[1]}h`;
+        } else if (minsMatch) {
+            timeStr = `${minsMatch[1]}m`;
+        }
+
+        if (miles && timeStr) {
+            return `${miles} • ${timeStr}`;
+        }
+        return miles || timeStr || rawStats;
+    }
+
     // --- Pre-Trip Morning Checklist Management ---
 
     function getChecklistState(dayNumber) {
@@ -417,58 +452,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const milestones = {
             1: {
-                title: "Allergy Milestone: High Humidity & Mold Zone",
+                title: "Day 1 Stay: Little Rock, AR (Southeast Basin)",
                 stage: "stage-warning",
-                badge: "40% Relief",
+                badge: "20% Overall Relief",
                 badgeClass: "badge-orange",
                 icon: "droplet",
-                desc: "Traversing the Southeast corridor. Humid air, high pollen, and active mold spores.",
-                progress: 40
+                progress: 20
             },
             2: {
-                title: "Allergy Milestone: Transition to Dry Western Air",
+                title: "Day 2 Stay: Amarillo, TX (High Plains 3,600 ft)",
                 stage: "stage-transition",
-                badge: "65% Relief",
+                badge: "40% Overall Relief",
                 badgeClass: "badge-accent",
                 icon: "wind",
-                desc: "Crossing the 100th Meridian. Humidity plummets from 80% to 25%, offering notable relief.",
-                progress: 65
+                progress: 40
             },
             3: {
-                title: "Allergy Milestone: Colorado Plateau & Pine Air",
+                title: "Day 3 Stay: Flagstaff, AZ (Alpine Plateau 6,900 ft)",
                 stage: "stage-breakthrough",
-                badge: "88% Clean Air",
+                badge: "65% Overall Relief",
                 badgeClass: "badge-green",
                 icon: "sparkles",
-                desc: "High elevation (6,900 ft) with crisp mountain air and near-zero mold levels.",
-                progress: 88
+                progress: 65
             },
             4: {
-                title: "Allergy Milestone: Mojave Desert & Tehachapi Pass",
+                title: "Day 4 Stay: Bakersfield, CA (Mojave & Tehachapi Pass)",
                 stage: "stage-breakthrough",
-                badge: "85% Clean Air",
+                badge: "80% Overall Relief",
                 badgeClass: "badge-green",
                 icon: "sparkles",
-                desc: "Ultra-low ambient humidity and clear mountain pass airflow.",
-                progress: 85
-            },
-            5: {
-                title: "Allergy Milestone: Shasta Cascade Gateway",
-                stage: "stage-transition",
-                badge: "80% Clean Air",
-                badgeClass: "badge-green",
-                icon: "wind",
-                desc: "Valley transit climbing directly into Shasta pine foothills.",
                 progress: 80
             },
-            6: {
-                title: "Allergy Milestone: Pacific Northwest Mountain Air",
-                stage: "stage-pristine",
-                badge: "98% Clean Air",
+            5: {
+                title: "Day 5 Stay: Redding, CA (Shasta Cascade Foothills)",
+                stage: "stage-breakthrough",
+                badge: "90% Overall Relief",
                 badgeClass: "badge-green",
                 icon: "sparkles",
-                desc: "Pristine Pacific Northwest mountain evergreen air. Full allergy relief achieved.",
-                progress: 98
+                progress: 90
+            },
+            6: {
+                title: "Day 6 Destination: Canyonville, OR (PNW Evergreen)",
+                stage: "stage-pristine",
+                badge: "100% Full Relief",
+                badgeClass: "badge-green",
+                icon: "sparkles",
+                progress: 100
             }
         };
 
@@ -481,14 +510,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="sinus-banner-icon-badge">
                             <i data-lucide="${milestone.icon}"></i>
                         </div>
-                        <span class="sinus-banner-title">${milestone.title}</span>
+                        <span class="sinus-banner-title">Sinus Ease: ${milestone.title.replace('Allergy Milestone: ', '')}</span>
                     </div>
                     <span class="sinus-meter-pill">${milestone.badge}</span>
                 </div>
-                <p class="sinus-banner-desc">${milestone.desc}</p>
                 <div class="sinus-progress-container">
                     <div class="sinus-progress-labels">
-                        <span>Caravan Clean-Air Progress</span>
+                        <span>Clean-Air Progress</span>
                         <span>${milestone.progress}%</span>
                     </div>
                     <div class="sinus-progress-bar-bg">
@@ -500,19 +528,19 @@ document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
     }
 
-    // --- Weather Mapping Helpers ---
+    // --- Weather Mapping Helpers (with Semantic Colors) ---
     function getWeatherInfo(code) {
-        if (code === 0) return { icon: 'sun', text: 'Clear Skies' };
-        if (code === 1) return { icon: 'sun-medium', text: 'Mainly Clear' };
-        if (code === 2) return { icon: 'cloud-sun', text: 'Partly Cloudy' };
-        if (code === 3) return { icon: 'cloud', text: 'Overcast' };
-        if (code >= 45 && code <= 48) return { icon: 'cloud-fog', text: 'Fog / Low Vis' };
-        if (code >= 51 && code <= 55) return { icon: 'cloud-drizzle', text: 'Drizzle' };
-        if (code >= 61 && code <= 65) return { icon: 'cloud-rain', text: 'Rain Showers' };
-        if (code >= 71 && code <= 77) return { icon: 'cloud-snow', text: 'Snow / Flurries' };
-        if (code >= 80 && code <= 82) return { icon: 'cloud-rain', text: 'Heavy Showers' };
-        if (code >= 95) return { icon: 'cloud-lightning', text: 'Thunderstorms' };
-        return { icon: 'sun', text: 'Clear' };
+        if (code === 0) return { icon: 'sun', text: 'Clear Skies', color: '#ffd60a' }; // Sunny warm yellow
+        if (code === 1) return { icon: 'sun-medium', text: 'Mainly Clear', color: '#ffd60a' }; // Sunny warm yellow
+        if (code === 2) return { icon: 'cloud-sun', text: 'Partly Cloudy', color: '#ffb340' }; // Warm gold
+        if (code === 3) return { icon: 'cloud', text: 'Overcast', color: '#98989d' }; // Slate grey
+        if (code >= 45 && code <= 48) return { icon: 'cloud-fog', text: 'Fog / Low Vis', color: '#8e8e93' }; // Fog grey
+        if (code >= 51 && code <= 55) return { icon: 'cloud-drizzle', text: 'Drizzle', color: '#64d2ff' }; // Sky blue
+        if (code >= 61 && code <= 65) return { icon: 'cloud-rain', text: 'Rain Showers', color: '#0a84ff' }; // Rain blue
+        if (code >= 71 && code <= 77) return { icon: 'cloud-snow', text: 'Snow / Flurries', color: '#a0e7ff' }; // Ice blue
+        if (code >= 80 && code <= 82) return { icon: 'cloud-rain', text: 'Heavy Showers', color: '#0062cc' }; // Deep blue
+        if (code >= 95) return { icon: 'cloud-lightning', text: 'Thunderstorms', color: '#ff9f0a' }; // Amber warning
+        return { icon: 'sun', text: 'Clear', color: '#ffd60a' };
     }
 
     // --- Weather Fetching & Caching ---
@@ -641,84 +669,6 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadWeatherForActiveDay(day) {
         const targetDate = getDateForDay(day.day_number);
 
-        // Update Daily Weather Summary & Solar Times in Day Header Card
-        try {
-            if (day.legs && day.legs.length > 0) {
-                const firstLeg = day.legs[0];
-                const firstStart = getCustomAddress(getLegId(firstLeg), 'start') || firstLeg.start_address || '';
-                const originCoords = await getCoordinates(firstStart, firstLeg.start_address, firstLeg.start_coords);
-                const weatherObj = await fetchHourlyForecast(originCoords.lat, originCoords.lon);
-                const dayHourly = weatherObj.hourly;
-                const dayDaily = weatherObj.daily;
-                
-                let day24hTemps = [];
-                let day24hCodes = [];
-                for (let i = 0; i < dayHourly.time.length; i++) {
-                    if (dayHourly.time[i].startsWith(targetDate)) {
-                        day24hTemps.push(Math.round(dayHourly.temperature_2m[i]));
-                        day24hCodes.push(dayHourly.weather_code[i] || 0);
-                    }
-                }
-
-                if (day24hTemps.length > 0) {
-                    const dailyLow = Math.min(...day24hTemps);
-                    const dailyHigh = Math.max(...day24hTemps);
-                    const peakCode = day24hCodes[Math.min(14, day24hCodes.length - 1)] || day24hCodes[0];
-                    const dayMeta = getWeatherInfo(peakCode);
-
-                    // Parse Sunrise & Sunset
-                    let sunriseStr = '';
-                    let sunsetStr = '';
-                    let daylightStr = '';
-
-                    if (dayDaily && dayDaily.time) {
-                        const dateIdx = dayDaily.time.findIndex(t => t === targetDate);
-                        const idx = dateIdx !== -1 ? dateIdx : 0;
-                        const riseISO = dayDaily.sunrise ? dayDaily.sunrise[idx] : null;
-                        const setISO = dayDaily.sunset ? dayDaily.sunset[idx] : null;
-
-                        sunriseStr = formatTimeFromISO(riseISO);
-                        sunsetStr = formatTimeFromISO(setISO);
-
-                        if (riseISO && setISO) {
-                            const riseMs = new Date(riseISO).getTime();
-                            const setMs = new Date(setISO).getTime();
-                            if (!isNaN(riseMs) && !isNaN(setMs) && setMs > riseMs) {
-                                const diffMins = Math.round((setMs - riseMs) / 60000);
-                                const hrs = Math.floor(diffMins / 60);
-                                const mins = diffMins % 60;
-                                daylightStr = `${hrs}h ${mins}m daylight`;
-                            }
-                        }
-                    }
-
-                    const dayPill = document.getElementById('day-weather-summary-pill');
-                    if (dayPill) {
-                        dayPill.style.display = 'flex';
-                        dayPill.innerHTML = `
-                            <div class="day-weather-content">
-                                <div class="day-weather-primary">
-                                    <i data-lucide="${dayMeta.icon}"></i>
-                                    <span>High ${dailyHigh}°F • Low ${dailyLow}°F (${dayMeta.text})</span>
-                                </div>
-                                ${sunriseStr && sunsetStr ? `
-                                <span class="weather-divider">•</span>
-                                <div class="day-solar-info">
-                                    <span>🌅 ${sunriseStr}</span>
-                                    <span>🌇 Sunset ${sunsetStr}</span>
-                                    ${daylightStr ? `<span class="daylight-badge">${daylightStr}</span>` : ''}
-                                </div>
-                                ` : ''}
-                            </div>
-                        `;
-                        lucide.createIcons();
-                    }
-                }
-            }
-        } catch (dayErr) {
-            console.warn('[Day Weather] Summary Error:', dayErr);
-        }
-
         for (const leg of day.legs) {
             const legId = getLegId(leg);
             const container = document.getElementById(`weather-widget-${legId}`);
@@ -804,33 +754,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     return 'badge-secondary';
                 };
 
-                const getAQIRowClass = (stage) => {
-                    if (stage === 'pristine') return 'aqi-pristine';
-                    if (stage === 'breakthrough') return 'aqi-good';
-                    if (stage === 'transition') return 'aqi-moderate';
-                    return 'aqi-warning';
+                const getAQIBadgeClass = (stage) => {
+                    if (stage === 'pristine') return 'badge-green';
+                    if (stage === 'breakthrough') return 'badge-green';
+                    if (stage === 'transition') return 'badge-accent';
+                    return 'badge-orange';
                 };
 
                 container.innerHTML = `
                     <div class="weather-grid">
-                        <div class="weather-main-stat">
-                            <div class="weather-icon-badge">
-                                <i data-lucide="${cond.icon}"></i>
-                            </div>
-                            <div class="weather-temp-range">
-                                <span class="temp-val">${minTemp === maxTemp ? `${avgTemp}°F` : `${minTemp}° – ${maxTemp}°F`}</span>
-                                <span class="weather-condition-text">${cond.text}</span>
-                            </div>
-                        </div>
-
                         <div class="weather-endpoint-readout">
                             <div class="endpoint-node">
                                 <span class="endpoint-node-label">Depart (${startLocationName}):</span>
-                                <span class="endpoint-node-val"><i data-lucide="${depCond.icon}"></i> ${depTemp}°F (${depCond.text})</span>
+                                <span class="endpoint-node-val">
+                                    <i data-lucide="${depCond.icon}" style="color: ${depCond.color};"></i>
+                                    <strong>${depTemp}°F</strong>
+                                    <span class="node-cond-text">(${depCond.text})</span>
+                                </span>
                             </div>
                             <div class="endpoint-node">
                                 <span class="endpoint-node-label">Arrive (${destLocationName}):</span>
-                                <span class="endpoint-node-val"><i data-lucide="${arrCond.icon}"></i> ${arrTemp}°F (${arrCond.text})</span>
+                                <span class="endpoint-node-val">
+                                    <i data-lucide="${arrCond.icon}" style="color: ${arrCond.color};"></i>
+                                    <strong>${arrTemp}°F</strong>
+                                    <span class="node-cond-text">(${arrCond.text})</span>
+                                </span>
                             </div>
                         </div>
 
@@ -843,18 +791,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <i data-lucide="umbrella"></i>
                                 <span>Precip ${maxPrecip}%</span>
                             </span>
+                            <span class="badge ${getAQIBadgeClass(aqiInfo.stage)}">
+                                <i data-lucide="sparkles"></i>
+                                <span>Sinus Ease: ${aqiInfo.sinusScore}/100</span>
+                            </span>
                             ${!isLiveForecast ? '<span class="badge badge-secondary" title="Simulated seasonal average baseline">Seasonal Baseline</span>' : ''}
-                        </div>
-
-                        <div class="aqi-sinus-row ${getAQIRowClass(aqiInfo.stage)}">
-                            <div class="aqi-tags-group">
-                                <span class="aqi-status-pill">
-                                    <i data-lucide="${aqiInfo.icon}"></i>
-                                    <span>${aqiInfo.statusText}</span>
-                                </span>
-                                <span class="sinus-score-badge">Sinus Ease: ${aqiInfo.sinusScore}/100</span>
-                            </div>
-                            <p class="aqi-tip-text">${aqiInfo.detail}</p>
                         </div>
                     </div>
                 `;
@@ -986,6 +927,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             tab.addEventListener('click', () => {
                 activeDayNumber = day.day_number;
+                activeLegIndex = 0;
                 document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
                 renderActiveDay();
@@ -993,6 +935,122 @@ document.addEventListener('DOMContentLoaded', () => {
 
             dayTabsContainer.appendChild(tab);
         });
+    }
+
+    // --- Carousel Navigation & Gesture Management (1-Card Swipe View) ---
+
+    function renderCarouselNav(day) {
+        if (!legsCarouselNav) return;
+        const totalLegs = day.legs.length;
+        if (totalLegs <= 1) {
+            legsCarouselNav.style.display = 'none';
+            return;
+        }
+        legsCarouselNav.style.display = 'flex';
+
+        if (activeLegIndex < 0 || activeLegIndex >= totalLegs) {
+            activeLegIndex = 0;
+        }
+
+        const activeLeg = day.legs[activeLegIndex];
+
+        legsCarouselNav.innerHTML = `
+            <div class="carousel-nav-inner">
+                <button class="carousel-nav-btn btn-carousel-prev" id="btn-carousel-prev" ${activeLegIndex === 0 ? 'disabled' : ''} title="Previous Stretch">
+                    <i data-lucide="chevron-left"></i>
+                </button>
+                <div class="carousel-indicator-group">
+                    <div class="carousel-status-pill">
+                        <span class="carousel-stretch-count" id="carousel-stretch-count">Stretch ${activeLegIndex + 1} of ${totalLegs}</span>
+                        <span class="carousel-stretch-title" id="carousel-stretch-title">${activeLeg.name}</span>
+                    </div>
+                    <div class="carousel-dots-wrap" id="carousel-dots-wrap">
+                        ${day.legs.map((l, i) => `
+                            <button class="carousel-dot ${i === activeLegIndex ? 'active' : ''} ${isLegCompleted(getLegId(l)) ? 'completed' : ''}" data-index="${i}" title="${l.name}"></button>
+                        `).join('')}
+                    </div>
+                </div>
+                <button class="carousel-nav-btn btn-carousel-next" id="btn-carousel-next" ${activeLegIndex === totalLegs - 1 ? 'disabled' : ''} title="Next Stretch">
+                    <i data-lucide="chevron-right"></i>
+                </button>
+            </div>
+        `;
+
+        const prevBtn = document.getElementById('btn-carousel-prev');
+        const nextBtn = document.getElementById('btn-carousel-next');
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                if (activeLegIndex > 0) {
+                    scrollToLeg(activeLegIndex - 1, true);
+                }
+            });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (activeLegIndex < totalLegs - 1) {
+                    scrollToLeg(activeLegIndex + 1, true);
+                }
+            });
+        }
+
+        document.querySelectorAll('.carousel-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                const targetIdx = parseInt(dot.getAttribute('data-index'), 10);
+                if (!isNaN(targetIdx)) {
+                    scrollToLeg(targetIdx, true);
+                }
+            });
+        });
+    }
+
+    function updateCarouselIndicators(index, day) {
+        if (!day || !day.legs) return;
+        const totalLegs = day.legs.length;
+        if (index < 0 || index >= totalLegs) return;
+
+        activeLegIndex = index;
+        const activeLeg = day.legs[index];
+
+        const countElem = document.getElementById('carousel-stretch-count');
+        const titleElem = document.getElementById('carousel-stretch-title');
+        const prevBtn = document.getElementById('btn-carousel-prev');
+        const nextBtn = document.getElementById('btn-carousel-next');
+
+        if (countElem) countElem.textContent = `Stretch ${index + 1} of ${totalLegs}`;
+        if (titleElem) titleElem.textContent = activeLeg.name;
+        if (prevBtn) prevBtn.disabled = index === 0;
+        if (nextBtn) nextBtn.disabled = index === totalLegs - 1;
+
+        document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+            if (i === index) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+            if (isLegCompleted(getLegId(day.legs[i]))) {
+                dot.classList.add('completed');
+            } else {
+                dot.classList.remove('completed');
+            }
+        });
+    }
+
+    function scrollToLeg(index, smooth = true) {
+        const cards = legsContainer.querySelectorAll('.leg-card');
+        if (cards[index]) {
+            activeLegIndex = index;
+            cards[index].scrollIntoView({
+                behavior: smooth ? 'smooth' : 'auto',
+                inline: 'start',
+                block: 'nearest'
+            });
+            const currentDay = itineraryData.find(d => d.day_number === activeDayNumber);
+            if (currentDay) {
+                updateCarouselIndicators(index, currentDay);
+            }
+        }
     }
 
     function renderActiveDay() {
@@ -1032,6 +1090,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Render Legs
         legsContainer.innerHTML = '';
+
+        // Auto-select first uncompleted leg if available
+        const uncompletedIdx = day.legs.findIndex(l => !isLegCompleted(getLegId(l)));
+        if (uncompletedIdx !== -1) {
+            activeLegIndex = uncompletedIdx;
+        } else if (activeLegIndex >= day.legs.length) {
+            activeLegIndex = 0;
+        }
         
         day.legs.forEach((leg, index) => {
             const legId = getLegId(leg);
@@ -1062,16 +1128,14 @@ document.addEventListener('DOMContentLoaded', () => {
             card.className = `leg-card ${isCompleted ? 'completed' : ''}`;
             card.id = `leg-card-${legId}`;
 
-            // Build inner HTML
-            let bannerHTML = '';
-            if (isLastLeg && !isCompleted) {
-                bannerHTML = `
-                    <div class="final-stretch-banner">
-                        <i data-lucide="flag"></i>
-                        <span>Final Stretch — Hotel Ahead</span>
-                    </div>
-                `;
-            }
+            // Build Top Stretch Name Header Banner (Above Start Directions)
+            const isFinalStretch = isLastLeg && !isCompleted;
+            const stretchHeaderHTML = `
+                <div class="leg-stretch-banner ${isFinalStretch ? 'is-final-stretch' : ''}">
+                    <i data-lucide="${isFinalStretch ? 'flag' : 'compass'}"></i>
+                    <span>${leg.name}${isFinalStretch ? ' — Final Stretch to Hotel' : ''}</span>
+                </div>
+            `;
 
             // Resolve Facility Information
             const destFacility = getFacilityInfo(leg.destination_type);
@@ -1087,20 +1151,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 startAddressHTML = `
                     <div class="waypoint-subcard waypoint-start">
                         <div class="waypoint-subcard-header">
-                            <div class="waypoint-type-tag">
-                                <i data-lucide="circle-dot"></i>
-                                <span>Departure Point</span>
+                            <div class="waypoint-venue-name">
+                                <i data-lucide="circle-dot" style="color: var(--primary);"></i>
+                                <strong>${leg.start_name || 'Origin'}</strong>
                             </div>
                             <button class="btn-edit-address" data-leg-id="${legId}" data-type="start" data-original="${leg.start_address || ''}" title="Edit Origin Address">
                                 <i data-lucide="pencil"></i>
                             </button>
                         </div>
-                        ${leg.start_name ? `
-                        <div class="waypoint-venue-name">
-                            <i data-lucide="${startFacility.icon}"></i>
-                            <strong>${leg.start_name}</strong>
-                        </div>
-                        ` : ''}
                         <p class="waypoint-address-text">${activeStart}</p>
                     </div>
                 `;
@@ -1118,24 +1176,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let destAddressHTML = '';
             if (activeDest) {
+                const destIconColor = (leg.destination_type === 'hotel') ? '#66d9ef' : ((leg.destination_type === 'home') ? '#ff9f0a' : 'var(--green)');
                 destAddressHTML = `
                     <div class="waypoint-subcard waypoint-dest">
                         <div class="waypoint-subcard-header">
-                            <div class="waypoint-type-tag waypoint-type-dest">
-                                <i data-lucide="${destIcon}"></i>
-                                <span>${destLabel}</span>
+                            <div class="waypoint-venue-name waypoint-dest-name">
+                                <i data-lucide="${destIcon}" style="color: ${destIconColor};"></i>
+                                <strong>${leg.destination_name || 'Destination'}</strong>
                                 ${customDest ? '<span class="badge badge-orange">Edited</span>' : ''}
                             </div>
                             <button class="btn-edit-address" data-leg-id="${legId}" data-type="dest" data-original="${leg.destination_address || ''}" title="Edit Destination Address">
                                 <i data-lucide="pencil"></i>
                             </button>
                         </div>
-                        ${leg.destination_name ? `
-                        <div class="waypoint-venue-name waypoint-dest-name">
-                            <i data-lucide="${destIcon}"></i>
-                            <strong>${leg.destination_name}</strong>
-                        </div>
-                        ` : ''}
                         <p class="waypoint-address-text">${activeDest}</p>
                         ${amenitiesHTML}
                     </div>
@@ -1146,10 +1199,11 @@ document.addEventListener('DOMContentLoaded', () => {
             let contextualBadgesHTML = '';
             if (transitStats) {
                 const durationColorClass = getDurationPillClass(transitStats);
+                const compactStats = formatCompactTransitStats(transitStats);
                 contextualBadgesHTML += `
                     <div class="stats-pill ${durationColorClass}">
                         <i data-lucide="car"></i>
-                        <span>${transitStats}</span>
+                        <span>${compactStats}</span>
                     </div>
                 `;
             }
@@ -1179,36 +1233,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             card.innerHTML = `
-                ${bannerHTML}
+                <!-- 1. TOP STRETCH NAME HEADER BANNER -->
+                ${stretchHeaderHTML}
                 
-                <!-- 1. CARD TOP HEADER -->
-                <div class="leg-card-header">
-                    <div class="leg-title-area">
-                        <div class="leg-title-row">
-                            <span class="leg-order-badge">Leg ${index + 1}</span>
-                            <h3>${leg.name}</h3>
-                        </div>
-                        ${leg.destination_name ? `
-                        <div class="leg-dest-subheading ${destFacility.boxClass}">
-                            <i data-lucide="${destIcon}"></i>
-                            <span>${destFacility.calloutPrefix}: <strong>${leg.destination_name}</strong></span>
-                        </div>
-                        ` : ''}
-                    </div>
-                    <div class="leg-header-badges">
-                        <div class="leg-header-action-group">
-                            <span class="leg-time-window">
-                                <i data-lucide="clock"></i>
-                                <span>${leg.departs} – ${leg.arrives}</span>
-                            </span>
-                            <button class="btn-share-stint" data-day="${day.day_number}" data-leg-index="${index + 1}" data-leg-name="${leg.name}" data-dep="${leg.departs}" data-arr="${leg.arrives}" data-start="${getShortLocationName(activeStart)}" data-dest="${leg.destination_name || ''}" data-miles="${leg.fuel_stint_miles || ''}" title="1-Tap Share Stint to Convoy">
-                                <i data-lucide="share-2"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. TOP PROMINENT NAVIGATION ACTION BAR -->
+                <!-- 2. TOP HERO NAVIGATION ACTION BUTTON -->
                 ${activeDest ? `
                 <div class="top-nav-action-bar">
                     <button class="btn btn-green btn-nav-directions btn-nav-primary" data-destination="${activeDest}">
@@ -1218,7 +1246,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 ` : ''}
 
-                <!-- 3. SECTION: 📍 WAYPOINTS & ADDRESSES -->
+                <!-- 3. LEG METADATA HEADER (Order Badge & Time Window) -->
+                <div class="leg-card-header">
+                    <div class="leg-header-left">
+                        <span class="leg-order-badge">Leg ${index + 1}</span>
+                    </div>
+                    <div class="leg-header-right">
+                        <span class="leg-time-window">
+                            <i data-lucide="clock"></i>
+                            <span>${leg.departs} – ${leg.arrives}</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 4. SECTION: 📍 WAYPOINTS & ADDRESSES -->
                 <div class="leg-section-box section-waypoints">
                     <div class="card-section-label">
                         <i data-lucide="map-pin"></i>
@@ -1230,25 +1271,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
 
-                <!-- 4. SECTION: 🗺️ ROUTE & HIGHWAY TRANSIT -->
+                <!-- 5. SECTION: 🗺️ ROUTE DETAILS & STRATEGY -->
                 <div class="leg-section-box section-route">
                     <div class="card-section-label">
                         <i data-lucide="compass"></i>
-                        <span>Route Details</span>
+                        <span>Route Details & Strategy</span>
                     </div>
-                    <div class="route-details-row">
-                        <p class="route-desc-text">${routePath}</p>
-                        <div class="route-badges-wrap">
-                            ${contextualBadgesHTML}
-                        </div>
+                    <div class="route-badges-wrap">
+                        ${contextualBadgesHTML}
                     </div>
+                    ${leg.operational_notes ? `
+                    <div class="route-notes-box">
+                        <p class="notes-text">${leg.operational_notes}</p>
+                    </div>
+                    ` : ''}
                 </div>
 
-                <!-- 5. SECTION: 🌤️ CORRIDOR WEATHER & SINUS RELIEF -->
+                <!-- 6. SECTION: 🌤️ WEATHER & SINUS EASE -->
                 <div class="leg-section-box section-weather">
                     <div class="card-section-label">
                         <i data-lucide="cloud-sun"></i>
-                        <span>Weather & Air Quality</span>
+                        <span>Weather & Sinus Ease</span>
                     </div>
                     <div class="weather-widget" id="weather-widget-${legId}">
                         <div class="weather-skeleton">
@@ -1256,15 +1299,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="skeleton-line skeleton-long"></div>
                         </div>
                     </div>
-                </div>
-
-                <!-- 6. SECTION: 📝 OPERATIONAL NOTES & STRATEGY -->
-                <div class="leg-section-box section-notes">
-                    <div class="card-section-label">
-                        <i data-lucide="file-text"></i>
-                        <span>Operational Notes</span>
-                    </div>
-                    <p class="notes-text">${leg.operational_notes}</p>
                 </div>
 
                 <!-- 7. CARD FOOTER -->
@@ -1280,11 +1314,19 @@ document.addEventListener('DOMContentLoaded', () => {
             legsContainer.appendChild(card);
         });
 
+        // Render Carousel Navigation & Indicator Bar
+        renderCarouselNav(day);
+
         // Add event listeners to newly created card elements
         setupCardEventListeners();
 
-        // Refresh icons inside dynamically rendered legs
+        // Refresh icons inside dynamically rendered legs & carousel nav
         lucide.createIcons();
+
+        // Position Carousel at the active stretch card
+        setTimeout(() => {
+            scrollToLeg(activeLegIndex, false);
+        }, 50);
 
         // Load dynamic road weather for the active day's legs
         loadWeatherForActiveDay(day);
@@ -1293,7 +1335,43 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Event Listeners Setup ---
 
     function setupGlobalEventListeners() {
-        // Trip Start Date change handler
+        // Horizontal Carousel Scroll Snap Tracking
+        let carouselScrollTimer = null;
+        if (legsContainer) {
+            legsContainer.addEventListener('scroll', () => {
+                if (carouselScrollTimer) clearTimeout(carouselScrollTimer);
+                carouselScrollTimer = setTimeout(() => {
+                    const cardWidth = legsContainer.offsetWidth;
+                    if (cardWidth > 0) {
+                        const scrollLeft = legsContainer.scrollLeft;
+                        const newIndex = Math.round(scrollLeft / cardWidth);
+                        const currentDay = itineraryData.find(d => d.day_number === activeDayNumber);
+                        if (currentDay && newIndex >= 0 && newIndex < currentDay.legs.length && newIndex !== activeLegIndex) {
+                            updateCarouselIndicators(newIndex, currentDay);
+                        }
+                    }
+                }, 60);
+            }, { passive: true });
+        }
+
+        // Trip Start Date Picker control
+        const dateControl = document.getElementById('trip-date-control');
+        if (dateControl && tripDateInput) {
+            dateControl.addEventListener('click', (e) => {
+                if (e.target !== tripDateInput) {
+                    try {
+                        if (typeof tripDateInput.showPicker === 'function') {
+                            tripDateInput.showPicker();
+                        } else {
+                            tripDateInput.focus();
+                        }
+                    } catch (err) {
+                        tripDateInput.focus();
+                    }
+                }
+            });
+        }
+
         if (tripDateInput) {
             tripDateInput.addEventListener('change', (e) => {
                 if (e.target.value) {
@@ -1447,57 +1525,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     const wasCompleted = isLegCompleted(legId);
                     toggleLegCompletion(legId);
-                    renderActiveDay();
                     
+                    const day = itineraryData.find(d => d.day_number === activeDayNumber);
                     if (!wasCompleted && isLastLegOfDay(legId)) {
                         triggerCelebration();
                     }
+
+                    // Auto-advance to the next stretch if completing this one
+                    if (!wasCompleted && day && activeLegIndex < day.legs.length - 1) {
+                        activeLegIndex = activeLegIndex + 1;
+                    }
+
+                    renderActiveDay();
                 }, 150);
-            });
-        });
-
-        // 1-Tap Share Stint Status
-        document.querySelectorAll('.btn-share-stint').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const dayNum = btn.getAttribute('data-day');
-                const legIndex = btn.getAttribute('data-leg-index');
-                const legName = btn.getAttribute('data-leg-name');
-                const dep = btn.getAttribute('data-dep');
-                const arr = btn.getAttribute('data-arr');
-                const start = btn.getAttribute('data-start');
-                const dest = btn.getAttribute('data-dest');
-                const miles = btn.getAttribute('data-miles');
-
-                const shareText = `🚚 Convoy Update (Day ${dayNum} • Leg ${legIndex}): Starting ${legName} from ${start} to ${dest}${miles ? ` (${miles} mi)` : ''}. Dep: ${dep} | Est. Arrival: ${arr}.`;
-
-                if (navigator.share) {
-                    navigator.share({
-                        title: `Convoy Day ${dayNum} - ${legName}`,
-                        text: shareText
-                    }).catch(err => {
-                        console.log('[Share] Dismissed:', err);
-                    });
-                } else {
-                    navigator.clipboard.writeText(shareText).then(() => {
-                        const icon = btn.querySelector('i');
-                        btn.classList.add('btn-share-copied');
-                        if (icon) {
-                            icon.setAttribute('data-lucide', 'check');
-                            lucide.createIcons();
-                        }
-
-                        setTimeout(() => {
-                            btn.classList.remove('btn-share-copied');
-                            if (icon) {
-                                icon.setAttribute('data-lucide', 'share-2');
-                                lucide.createIcons();
-                            }
-                        }, 2000);
-                    }).catch(err => {
-                        console.warn('[Share] Clipboard error:', err);
-                    });
-                }
             });
         });
 
