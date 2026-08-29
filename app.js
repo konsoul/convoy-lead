@@ -303,6 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function getLegVibe(leg, transitStats) {
         let totalMinutes = 0;
         let miles = leg.fuel_stint_miles || null;
+        let timeStr = '';
 
         const sourceText = transitStats || leg.route_details || '';
         if (sourceText) {
@@ -313,6 +314,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (milesMatch && !miles) miles = parseInt(milesMatch[1], 10);
             if (hoursMatch) totalMinutes += parseInt(hoursMatch[1], 10) * 60;
             if (minsMatch) totalMinutes += parseInt(minsMatch[1], 10);
+
+            if (hoursMatch && minsMatch) {
+                timeStr = `${hoursMatch[1]}h ${minsMatch[1]}m`;
+            } else if (hoursMatch) {
+                timeStr = `${hoursMatch[1]}h`;
+            } else if (minsMatch) {
+                timeStr = `${minsMatch[1]}m`;
+            }
         }
 
         const distanceDisplay = miles ? `${miles} mi` : '';
@@ -328,7 +337,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 icon: 'zap',
                 headline: "ITS A QUICK ONE!!",
                 subtext: "Quick cruise ahead!",
-                distanceText: distanceDisplay
+                distanceText: distanceDisplay,
+                durationText: timeStr
             };
         } else if (totalMinutes <= 165 && totalMinutes > 0) {
             return {
@@ -337,7 +347,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 icon: 'sparkles',
                 headline: "Nice short leg!",
                 subtext: "Smooth driving stretch",
-                distanceText: distanceDisplay
+                distanceText: distanceDisplay,
+                durationText: timeStr
             };
         } else {
             return {
@@ -346,7 +357,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 icon: 'coffee',
                 headline: "Got a long one coming, buckle in!",
                 subtext: "Settle in & pace yourself",
-                distanceText: distanceDisplay
+                distanceText: distanceDisplay,
+                durationText: timeStr
             };
         }
     }
@@ -1296,12 +1308,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span class="leg-vibe-subtext">${legVibe.subtext}</span>
                         </div>
                     </div>
-                    ${legVibe.distanceText ? `
                     <div class="leg-vibe-stats-pill">
                         <i data-lucide="map-pin" class="vibe-pin-icon"></i>
-                        <span class="vibe-stat-distance">${legVibe.distanceText}</span>
+                        ${legVibe.distanceText ? `<span class="vibe-stat-distance">${legVibe.distanceText}</span>` : ''}
+                        ${legVibe.distanceText && legVibe.durationText ? `<span class="vibe-stat-dot">•</span>` : ''}
+                        ${legVibe.durationText ? `<span class="vibe-stat-duration">${legVibe.durationText}</span>` : ''}
                     </div>
-                    ` : ''}
                 </div>
             `;
 
