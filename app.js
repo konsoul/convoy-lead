@@ -1648,20 +1648,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Navigate via Deep-Link Directions
+        // Navigate via Deep-Link Directions (Google Maps)
         document.querySelectorAll('.btn-nav-directions').forEach(btn => {
             btn.addEventListener('click', () => {
                 const destination = btn.getAttribute('data-destination');
-                
-                const isApple = /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent);
-                
-                let mapsUrl = '';
-                if (isApple) {
-                    mapsUrl = `maps://?daddr=${encodeURIComponent(destination)}&dirflg=d`;
-                } else {
-                    mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`;
-                }
-                
+                const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`;
                 window.open(mapsUrl, '_blank');
             });
         });
