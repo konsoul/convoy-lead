@@ -948,7 +948,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Custom Address Overrides ---
 
     function getCustomAddress(legId, type) {
-        return localStorage.getItem(`convoy_custom_addr_${legId}_${type}`);
+        const val = localStorage.getItem(`convoy_custom_addr_${legId}_${type}`);
+        if (val && val.includes('Flagstaff')) {
+            localStorage.removeItem(`convoy_custom_addr_${legId}_${type}`);
+            return null;
+        }
+        return val;
     }
 
     function setCustomAddress(legId, type, address) {
