@@ -473,9 +473,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (dayNumber === 3) {
             stage = 'breakthrough';
             sinusScore = 88;
-            statusText = 'Alpine Arid & High Desert Pine';
+            statusText = 'Arid High Desert & Route 66 Air';
             icon = 'sparkles';
-            detail = 'High plateau (6,900 ft). Crisp, low humidity and high pollen dispersion.';
+            detail = 'High desert plateau (4,850 ft). Crisp, low humidity and clear desert atmosphere.';
         } else if (dayNumber === 4) {
             stage = 'breakthrough';
             sinusScore = 85;
@@ -531,7 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 progress: 40
             },
             3: {
-                title: "Day 3 Stay: Flagstaff, AZ (Alpine Plateau 6,900 ft)",
+                title: "Day 3 Stay: Winslow, AZ (High Desert 4,850 ft)",
                 stage: "stage-breakthrough",
                 badge: "65% Overall Relief",
                 badgeClass: "badge-green",

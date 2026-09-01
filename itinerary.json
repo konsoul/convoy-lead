@@ -128,18 +128,18 @@
         }
       ]
     },
-    {
+  {
       "day_number": 3,
-      "title": "Tucumcari, NM to Flagstaff, AZ",
+      "title": "Tucumcari, NM to Winslow, AZ",
       "start_location": "Tucumcari, NM",
-      "end_location": "Flagstaff, AZ",
-      "hotel": "La Quinta Inn & Suites Flagstaff",
+      "end_location": "Winslow, AZ",
+      "hotel": "Best Western Plus Winslow Inn",
       "hotel_info": {
-        "parking_note": "Designated oversized parking on west side; easy ingress/egress off I-40",
-        "breakfast": "Bright Side Hot Breakfast (6:00 AM – 9:00 AM)",
-        "amenities": ["Convoy Parking", "Free Breakfast", "Pet Friendly (Free)", "High Elevation: 6,900 ft"]
+        "parking_note": "Spacious commercial & trailer parking on side lot; easy turning radius right off I-40 (Exit 253)",
+        "breakfast": "Complimentary Full Hot Breakfast (6:00 AM – 9:30 AM)",
+        "amenities": ["Convoy Parking", "Free Hot Breakfast", "Indoor Heated Pool & Hot Tub", "Pet Friendly", "Historic Route 66"]
       },
-      "target": "Traverse Albuquerque and the complex 'Big I' interchange smoothly after peak morning hours.",
+      "target": "Traverse Albuquerque mid-day and cross into the dry Arizona plateau for a relaxing evening in historic Winslow.",
       "legs": [
         {
           "name": "Morning Stretch",
@@ -177,26 +177,26 @@
         {
           "name": "Evening Stretch",
           "departs": "01:58 PM",
-          "arrives": "03:43 PM",
-          "route_details": "3540 E Historic Hwy 66, Gallup, NM 87301 → 2015 S Beulah Blvd, Flagstaff, AZ 86001 (191 miles, approx. 2 hrs 45 mins)",
-          "operational_notes": "Final drive into the Flagstaff hotel (La Quinta Inn & Suites). Note: If traveling during Daylight Saving Time, crossing into Arizona will gain 1 hour, shifting local arrival to 02:43 PM MST.",
+          "arrives": "02:48 PM",
+          "route_details": "3540 E Historic Hwy 66, Gallup, NM 87301 → 816 Transcon Ln, Winslow, AZ 86047 (128 miles, approx. 1 hr 50 mins)",
+          "operational_notes": "Scenic Route 66 corridor drive into Winslow, AZ. Note: Crossing into Arizona gains 1 hour (MDT to MST/AZ), bringing local hotel arrival to 02:48 PM MST with plenty of daylight to relax at Best Western Plus.",
           "start_name": "Maverik Adventure's First Stop (#535)",
           "start_address": "3540 E Historic Highway 66, Gallup, NM 87301",
           "start_coords": { "lat": 35.5348, "lon": -108.6942 },
-          "destination_name": "La Quinta Inn & Suites by Wyndham Flagstaff",
+          "destination_name": "Best Western Plus Winslow Inn",
           "destination_type": "hotel",
-          "destination_address": "2015 S Beulah Boulevard, Flagstaff, AZ 86001",
-          "destination_coords": { "lat": 35.1783, "lon": -111.6622 },
-          "fuel_stint_miles": 191,
+          "destination_address": "816 Transcon Lane, Winslow, AZ 86047",
+          "destination_coords": { "lat": 35.0242, "lon": -110.6865 },
+          "fuel_stint_miles": 128,
           "timezone_change": "Gain 1 Hr (MDT ➔ MST/AZ)",
-          "amenities": ["Hotel Arrival", "Mountain Pine Air (6,900 ft)", "Convoy Parking"]
+          "amenities": ["Hotel Arrival", "Convoy Parking", "Indoor Heated Pool", "Standin' on the Corner Park Nearby"]
         }
       ]
     },
     {
       "day_number": 4,
-      "title": "Flagstaff, AZ to Tehachapi, CA",
-      "start_location": "Flagstaff, AZ",
+      "title": "Winslow, AZ to Tehachapi, CA",
+      "start_location": "Winslow, AZ",
       "end_location": "Tehachapi, CA",
       "hotel": "Fairfield Inn & Suites Tehachapi",
       "hotel_info": {
@@ -204,28 +204,28 @@
         "breakfast": "Complimentary Hot Breakfast (6:00 AM – 9:30 AM)",
         "amenities": ["Convoy Parking", "Free Breakfast", "Mountain Pass Rest", "Indoor Pool"]
       },
-      "target": "Steady desert transit with standard highway parameters. No major city bottlenecks.",
+      "target": "Steady desert transit from Winslow across Northern Arizona and the Mojave desert into Tehachapi Pass.",
       "legs": [
         {
           "name": "Morning Stretch",
-          "departs": "08:00 AM",
-          "arrives": "09:58 AM",
-          "route_details": "2015 S Beulah Blvd, Flagstaff, AZ 86001 → 6035 E Minerva Ln, Kingman, AZ 86401 (136 miles, approx. 1 hr 58 mins)",
-          "operational_notes": "Scenic, open drive descending down the I-40 W corridor. Plan a 30-minute fuel stop at Love's Travel Stop #272 (Exit 59).",
-          "start_name": "La Quinta Inn & Suites Flagstaff",
-          "start_address": "2015 S Beulah Boulevard, Flagstaff, AZ 86001",
-          "start_coords": { "lat": 35.1783, "lon": -111.6622 },
+          "departs": "07:30 AM",
+          "arrives": "10:18 AM",
+          "route_details": "816 Transcon Ln, Winslow, AZ 86047 → 6035 E Minerva Ln, Kingman, AZ 86401 (195 miles, approx. 2 hrs 48 mins)",
+          "operational_notes": "Departing Best Western Plus Winslow on I-40 W past Flagstaff and Williams, descending into Kingman. Plan a 30-minute fuel stop at Love's Travel Stop #272 (Exit 59).",
+          "start_name": "Best Western Plus Winslow Inn",
+          "start_address": "816 Transcon Lane, Winslow, AZ 86047",
+          "start_coords": { "lat": 35.0242, "lon": -110.6865 },
           "destination_name": "Love's Travel Stop (#272)",
           "destination_type": "travel_stop",
           "destination_address": "6035 E Minerva Lane, Kingman, AZ 86401",
           "destination_coords": { "lat": 35.2341, "lon": -113.9213 },
-          "fuel_stint_miles": 136,
+          "fuel_stint_miles": 195,
           "amenities": ["Love's Travel Stop", "Chester's Chicken", "Godfather's Pizza", "DEF", "Dog Park"]
         },
         {
           "name": "Midday Run",
-          "departs": "10:28 AM",
-          "arrives": "01:51 PM",
+          "departs": "10:48 AM",
+          "arrives": "02:11 PM",
           "route_details": "6035 E Minerva Ln, Kingman, AZ 86401 → 491 Armory Rd, Barstow, CA 92311 (215 miles, approx. 3 hrs 23 mins)",
           "operational_notes": "Sustained open Mojave desert transit. Enter California on I-40 W. Plan a 30-minute break at Valero / 7-Eleven.",
           "start_name": "Love's Travel Stop (#272)",
@@ -241,8 +241,8 @@
         },
         {
           "name": "Evening Stretch",
-          "departs": "02:21 PM",
-          "arrives": "03:49 PM",
+          "departs": "02:41 PM",
+          "arrives": "04:09 PM",
           "route_details": "491 Armory Rd, Barstow, CA 92311 → 422 W Tehachapi Blvd, Tehachapi, CA 93561 (90 miles, approx. 1 hr 28 mins)",
           "operational_notes": "Short final leg transitioning cleanly off I-40 onto CA-58 W through Mojave up to the Tehachapi mountain pass hotel (Fairfield Inn & Suites).",
           "start_name": "Valero Gas / 7-Eleven",
